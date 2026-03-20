@@ -10,6 +10,9 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
+import java.awt.font.TextAttribute;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UniversalThemes {
 
@@ -55,6 +58,19 @@ public class UniversalThemes {
     public static final Font UI_FONT_EMOJI3       = new Font("Segoe UI Emoji", Font.PLAIN, 22);
 
 
+    public static Font getCompositeFont(int size) {
+        // Segoe UI Symbol covers ❌❎✅✔ AND renders normal Latin text fine
+        // It is pre-installed on all Windows machines with Java
+        // On other OS, Dialog falls back gracefully
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            return new Font("Segoe UI Symbol", Font.PLAIN, size);
+        } else if (os.contains("mac")) {
+            return new Font("Apple Color Emoji", Font.PLAIN, size);
+        } else {
+            return new Font("Noto Color Emoji", Font.PLAIN, size);
+        }
+    }
 
 
     // ===== UI Helpers =====

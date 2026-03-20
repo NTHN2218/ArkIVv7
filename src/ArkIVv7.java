@@ -47,7 +47,7 @@ public class ArkIVv7 {
         int width = 1200;
         int height = bounds.height;
 
-        frame = new JFrame("Task Manager");
+        frame = new JFrame("ArkIV");
         //frame.setSize(width, height);
         frame.getContentPane().setBackground(UniversalThemes.BG_MAIN);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -70,7 +70,8 @@ public class ArkIVv7 {
         frame.add(scrollPane, BorderLayout.CENTER);
 
         JTextArea inputArea = new JTextArea(3, 30);
-        inputArea.setFont(UniversalThemes.UI_FONT_BIG2);
+//      inputArea.setFont(UniversalThemes.UI_FONT_BIG2);
+        inputArea.setFont(UniversalThemes.getCompositeFont(20));  //Provides Emoji support for inputArea, but when entered the taskItem does not recognise it
         inputArea.setBackground(UniversalThemes.BG_COMPONENT);
         inputArea.setForeground(UniversalThemes.TXT_PRIMARY);
         inputArea.setCaretColor(UniversalThemes.ACCENT_COLOR);
@@ -424,12 +425,11 @@ public class ArkIVv7 {
                     return d;
                 }
             };
-            textArea.setFont(UniversalThemes.UI_FONT_BIG2);
+            textArea.setFont(UniversalThemes.getCompositeFont(20));
             textArea.setForeground(UniversalThemes.TXT_PRIMARY);
             textArea.setCaretColor(UniversalThemes.ACCENT_COLOR);
             textArea.setOpaque(false);
 
-            textArea.setFont(new Font("Segoe UI", Font.PLAIN, 20));
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
             textArea.setEditable(false);
@@ -511,8 +511,7 @@ public class ArkIVv7 {
             } else {
                 addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent e) {
-                        selectThisTask();
-                        checkBox.setSelected(true);
+                        //Do nothing
                     }
                 });
             }
@@ -754,7 +753,7 @@ public class ArkIVv7 {
 
             // UI styling
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            field.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+            field.setFont(UniversalThemes.getCompositeFont(20));
             field.setMargin(new Insets(10, 10, 10, 10));
 
 
@@ -819,7 +818,7 @@ public class ArkIVv7 {
             scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR, 1));
 
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            field.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+            field.setFont(UniversalThemes.getCompositeFont(20));
             field.setLineWrap(true);
             field.setWrapStyleWord(true);
             field.setMargin(new Insets(10, 10, 10, 10));
