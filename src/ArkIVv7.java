@@ -373,6 +373,7 @@ public class ArkIVv7 {
             this.isSubtask = isSubtask;
             this.isCollapsed = isCollapsed;
 
+
             setLayout(new BorderLayout());
             Color cardBg = isSubtask
                     ? UniversalThemes.BG_COMPONENT
@@ -405,6 +406,7 @@ public class ArkIVv7 {
             checkBox = new JCheckBox();
             checkBox.setPreferredSize(new Dimension(30, 30));
             checkBox.setBackground(UniversalThemes.BG_MAIN);
+            UniversalThemes.applyCheckBoxTheme(checkBox);
             checkBox.setSelected(done);
 
             // ActionListener for flicker effect and selection management
@@ -558,6 +560,8 @@ public class ArkIVv7 {
             selectedTask = this;
             isSelected = true;
             startFlicker();
+            // request focus so key bindings on this panel can fire
+            SwingUtilities.invokeLater(() -> this.requestFocusInWindow());
         }
 
         private void deselectThisTask() {
@@ -982,11 +986,11 @@ public class ArkIVv7 {
                 selectThisTask();
             }
             // Request focus on checkbox or text area to keep key events firing  
-            if (checkBox != null) {
-                checkBox.requestFocusInWindow();
-            } else {
-                this.requestFocusInWindow();
-            }
+            SwingUtilities.invokeLater(() -> {
+                if (isSelected) {
+                    textArea.requestFocusInWindow();
+                }
+            });
         }
 
         // New method: Move this task down within its allowed range, allowing repeated moves while selected  
@@ -1070,14 +1074,12 @@ public class ArkIVv7 {
                 selectThisTask();
             }
             // Request focus on checkbox or text area to keep key events firing  
-            if (checkBox != null) {
-                checkBox.requestFocusInWindow();
-            } else {
-                this.requestFocusInWindow();
-            }
+            SwingUtilities.invokeLater(() -> {
+                if (isSelected) {
+                    textArea.requestFocusInWindow();
+                }
+            });
         }
-
-
 
     }
 }

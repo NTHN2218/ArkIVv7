@@ -201,6 +201,106 @@ public class UniversalThemes {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
     }
 
+    public static void applyCheckBoxTheme(JCheckBox checkBox) {
+
+        boolean[] isHovered = {false};
+
+        checkBox.setUI(new javax.swing.plaf.basic.BasicCheckBoxUI() {
+            @Override
+            public synchronized void paint(Graphics g, JComponent c) {
+                JCheckBox cb = (JCheckBox) c;
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int boxSize = 12;
+                int x = (c.getWidth() - boxSize) / 2;
+                x=x-1;
+                int y = (c.getHeight() - boxSize) / 2;
+
+                // Draw background box
+                g2.setColor(cb.isEnabled() ? BORDER_COLOR : new Color(0x1A1A1E));
+                g2.fillRect(x, y, boxSize, boxSize);
+
+                // Draw border
+                g2.setColor(cb.isEnabled() ? BORDER_COLOR : new Color(0x3A3A40));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawRect(x, y, boxSize, boxSize);
+
+                // Draw checkmark if selected
+                if (cb.isSelected()) {
+                    // Fill with orange
+                    g2.setColor(cb.isEnabled() ? ACCENT_COLOR : DISABLED_TEXT);
+                    g2.fillRect(x, y, boxSize, boxSize);
+                    g2.setColor(cb.isEnabled() ? BORDER_COLOR : new Color(0x3A3A40));
+                    g2.setStroke(new BasicStroke(1f));
+                    g2.drawRect(x, y, boxSize, boxSize);
+
+
+                    // Draw checkmark (white tick)
+                    g2.setColor(cb.isEnabled() ? TXT_SELECTED : new Color(0x9A9A9A));
+                    g2.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                    g2.drawLine(x + 3, y + 6,  x + 4,  y + 9);
+                    g2.drawLine(x + 4, y + 9, x + 10, y + 3);
+                }
+
+                // Hover highlight overlay
+                if (isHovered[0]) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.15f));
+                    g2.setColor(cb.isEnabled() ? Color.WHITE : ACCENT_COLOR);
+                    g2.fillRect(x, y, boxSize, boxSize);
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+                }
+
+                // Draw label text
+                FontMetrics fm = g2.getFontMetrics(cb.getFont());
+                g2.setFont(cb.getFont());
+                g2.setColor(cb.isEnabled() ? TXT_PRIMARY : DISABLED_TEXT);
+                String text = cb.getText();
+                if (text != null && !text.isEmpty()) {
+                    int textX = x + boxSize + 6;
+                    int textY = (c.getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                    g2.drawString(text, textX, textY);
+                }
+
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize(JComponent c) {
+                JCheckBox cb = (JCheckBox) c;
+                FontMetrics fm = cb.getFontMetrics(cb.getFont());
+                int textWidth = (cb.getText() != null) ? fm.stringWidth(cb.getText()) : 0;
+                return new Dimension(textWidth + 28, 20);
+            }
+        });
+
+        // Remove default focus painting
+        checkBox.setFocusPainted(false);
+        checkBox.setFocusable(false);
+        checkBox.setOpaque(true);
+        checkBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        checkBox.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                isHovered[0] = true;
+                checkBox.repaint();
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                isHovered[0] = false;
+                checkBox.repaint();
+            }
+        });
+
+        // Repaint on enabled state change
+        checkBox.addPropertyChangeListener("enabled", evt -> checkBox.repaint());
+
+        checkBox.setForeground(TXT_PRIMARY);
+        checkBox.setFont(UI_FONT_BIG);
+    }
+
+
 
     public static void showPopup(Component parent, String message, String title) {
         // Create a custom modal dialog
