@@ -20,9 +20,12 @@ public class UniversalThemes {
     public static final Color BG_MAIN        = new Color(0x0F0F12);
     public static final Color BG_PANEL       = new Color(0x1A1A1E);
     public static final Color BG_COMPONENT   = new Color(0x222226);
+    public static final Color BG_SIDEBAR     = new Color(0x1e1f22);
     public static final Color TXT_PRIMARY    = new Color(0xE5E5E5);
     public static final Color TXT_SECONDARY  = new Color(0xBEBEBE);
-    public static final Color BORDER_COLOR   = new Color(0x303036);
+    public static final Color BORDER_COLOR1   = new Color(0x303036);
+    public static final Color BORDER_COLOR2   = new Color(0x6A6A6A);
+
 
     public static final Color ACCENT_COLOR    = new Color(0x2fafbc);  //0xE67E22
     public static final Color ACCENT_COLOR_DARK = new Color(0x2b929d);  //0xC66A1A
@@ -218,11 +221,11 @@ public class UniversalThemes {
                 int y = (c.getHeight() - boxSize) / 2;
 
                 // Draw background box
-                g2.setColor(cb.isEnabled() ? BORDER_COLOR : new Color(0x1A1A1E));
+                g2.setColor(cb.isEnabled() ? BORDER_COLOR1 : new Color(0x1A1A1E));
                 g2.fillRect(x, y, boxSize, boxSize);
 
                 // Draw border
-                g2.setColor(cb.isEnabled() ? BORDER_COLOR : new Color(0x3A3A40));
+                g2.setColor(cb.isEnabled() ? BORDER_COLOR1 : new Color(0x3A3A40));
                 g2.setStroke(new BasicStroke(1.5f));
                 g2.drawRect(x, y, boxSize, boxSize);
 
@@ -231,7 +234,7 @@ public class UniversalThemes {
                     // Fill with orange
                     g2.setColor(cb.isEnabled() ? ACCENT_COLOR : DISABLED_TEXT);
                     g2.fillRect(x, y, boxSize, boxSize);
-                    g2.setColor(cb.isEnabled() ? BORDER_COLOR : new Color(0x3A3A40));
+                    g2.setColor(cb.isEnabled() ? BORDER_COLOR1 : new Color(0x3A3A40));
                     g2.setStroke(new BasicStroke(1f));
                     g2.drawRect(x, y, boxSize, boxSize);
 

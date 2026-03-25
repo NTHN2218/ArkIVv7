@@ -65,7 +65,7 @@ public class ArkIVv7 {
         taskPanel.setLayout(new BoxLayout(taskPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(taskPanel);
-        scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR, 1));
+        scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR1, 1));
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.getVerticalScrollBar().setUnitIncrement(35);
         scrollPane.getViewport().setBackground(UniversalThemes.BG_MAIN);
@@ -73,16 +73,16 @@ public class ArkIVv7 {
 
 // Sidebar panel (1/4 width, left side)
         JPanel sidebarPanel = new JPanel();
-        sidebarPanel.setBackground(UniversalThemes.BG_PANEL);
+        sidebarPanel.setBackground(UniversalThemes.BG_SIDEBAR);
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
 
 // Divider line on the right edge of the sidebar
-        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR));
+        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
 
 // Split pane: sidebar on left, task scroll on right
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebarPanel, scrollPane);
-        splitPane.setResizeWeight(0.25);          // sidebar gets 1/4, tasks get 3/4
-        splitPane.setDividerSize(1);              // thin divider (the border handles visual separation)
+        splitPane.setResizeWeight(0.225);
+        splitPane.setDividerSize(0);              // thin divider (the border handles visual separation)
         splitPane.setBorder(null);
         splitPane.setBackground(UniversalThemes.BG_MAIN);
 
@@ -95,15 +95,14 @@ public class ArkIVv7 {
         splitPane.setEnabled(false);
 
         frame.add(splitPane, BorderLayout.CENTER);
+
         inputArea = new JTextArea(3, 30);
 //      inputArea.setFont(UniversalThemes.UI_FONT_BIG2);
         inputArea.setFont(UniversalThemes.getCompositeFont(20));  //Provides Emoji support for inputArea, but when entered the taskItem does not recognise it
         inputArea.setBackground(UniversalThemes.BG_COMPONENT);
         inputArea.setForeground(UniversalThemes.TXT_PRIMARY);
         inputArea.setCaretColor(UniversalThemes.ACCENT_COLOR);
-        inputArea.setBorder(
-                BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR, 2)
-        );
+        inputArea.setBorder(BorderFactory.createMatteBorder(1,1, 1,1,UniversalThemes.BORDER_COLOR1));
 
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
@@ -113,7 +112,7 @@ public class ArkIVv7 {
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.getViewport().setBackground(UniversalThemes.BG_PANEL);
         inputScroll.setBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR)
+                BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR1)
         );
         UniversalThemes.applyScrollbarTheme(inputScroll);
 
@@ -170,8 +169,9 @@ public class ArkIVv7 {
         });
 
         inputSpacer = new JPanel();
-        inputSpacer.setBackground(UniversalThemes.BG_PANEL);
-        inputSpacer.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR));
+        inputSpacer.setBackground(UniversalThemes.BG_SIDEBAR);
+        inputSpacer.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, UniversalThemes.BORDER_COLOR2));
+
 
         bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBackground(UniversalThemes.BG_MAIN);
@@ -424,9 +424,9 @@ public class ArkIVv7 {
             // Outer border (same as original)
             Border outerBorder;
             if (isSubtask) {
-                outerBorder = BorderFactory.createMatteBorder(5, 30, 2, 30, UniversalThemes.BORDER_COLOR);
+                outerBorder = BorderFactory.createMatteBorder(5, 30, 2, 30, UniversalThemes.BORDER_COLOR1);
             } else {
-                outerBorder = BorderFactory.createMatteBorder(1, 0, isCollapsed ? 10 : 0, 0, UniversalThemes.BORDER_COLOR);
+                outerBorder = BorderFactory.createMatteBorder(1, 0, isCollapsed ? 10 : 0, 0, UniversalThemes.BORDER_COLOR1);
             }
 
             // Inner border (2 pixels thick now)
@@ -533,7 +533,7 @@ public class ArkIVv7 {
                     public void mousePressed(MouseEvent e) {
                         if (SwingUtilities.isRightMouseButton(e)) {
                             TaskItem.this.isCollapsed = !TaskItem.this.isCollapsed;
-                            Border newOuter = BorderFactory.createMatteBorder(1, 0, TaskItem.this.isCollapsed ? 10 : 0, 0, UniversalThemes.BORDER_COLOR);
+                            Border newOuter = BorderFactory.createMatteBorder(1, 0, TaskItem.this.isCollapsed ? 10 : 0, 0, UniversalThemes.BORDER_COLOR1);
                             Border currentBorder = getBorder();
                             Border currentInner;
                             if (currentBorder instanceof CompoundBorder) {
@@ -789,7 +789,7 @@ public class ArkIVv7 {
             // Scroll pane for field
             JScrollPane scrollPane = new JScrollPane(field);
             scrollPane.setBackground(UniversalThemes.BG_PANEL);
-            scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR, 1));
+            scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR1, 1));
 
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -859,7 +859,7 @@ public class ArkIVv7 {
             field.setCaretColor(UniversalThemes.ACCENT_COLOR);
 
             JScrollPane scrollPane = new JScrollPane(field);
-            scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR, 1));
+            scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR1, 1));
             UniversalThemes.applyScrollbarTheme(scrollPane);
 
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
