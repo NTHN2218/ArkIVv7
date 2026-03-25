@@ -32,6 +32,9 @@ public class ArkIVv7 {
     private static final String IV = "dataEncryptIV328";
     private JTextArea inputArea;
 
+    private JPanel inputSpacer;
+    private JPanel bottomPanel;
+
 
     private Map<Integer, TaskItem> idToTaskMap = new HashMap<>();
     private List<TaskItem> allTasks = new ArrayList<>();
@@ -67,9 +70,32 @@ public class ArkIVv7 {
         scrollPane.getVerticalScrollBar().setUnitIncrement(35);
         scrollPane.getViewport().setBackground(UniversalThemes.BG_MAIN);
         UniversalThemes.applyScrollbarTheme(scrollPane);
-        frame.add(scrollPane, BorderLayout.CENTER);
 
-        JTextArea inputArea = new JTextArea(3, 30);
+// Sidebar panel (1/4 width, left side)
+        JPanel sidebarPanel = new JPanel();
+        sidebarPanel.setBackground(UniversalThemes.BG_PANEL);
+        sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
+
+// Divider line on the right edge of the sidebar
+        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR));
+
+// Split pane: sidebar on left, task scroll on right
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebarPanel, scrollPane);
+        splitPane.setResizeWeight(0.25);          // sidebar gets 1/4, tasks get 3/4
+        splitPane.setDividerSize(1);              // thin divider (the border handles visual separation)
+        splitPane.setBorder(null);
+        splitPane.setBackground(UniversalThemes.BG_MAIN);
+
+        splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -> {
+            inputSpacer.setPreferredSize(new Dimension(splitPane.getDividerLocation() + 1, 0));
+            bottomPanel.revalidate();
+        });
+
+// Prevent the divider from being dragged
+        splitPane.setEnabled(false);
+
+        frame.add(splitPane, BorderLayout.CENTER);
+        inputArea = new JTextArea(3, 30);
 //      inputArea.setFont(UniversalThemes.UI_FONT_BIG2);
         inputArea.setFont(UniversalThemes.getCompositeFont(20));  //Provides Emoji support for inputArea, but when entered the taskItem does not recognise it
         inputArea.setBackground(UniversalThemes.BG_COMPONENT);
@@ -143,8 +169,18 @@ public class ArkIVv7 {
             }
         });
 
-        frame.add(inputScroll, BorderLayout.SOUTH);
+        inputSpacer = new JPanel();
+        inputSpacer.setBackground(UniversalThemes.BG_PANEL);
+        inputSpacer.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR));
 
+        bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(UniversalThemes.BG_MAIN);
+        bottomPanel.add(inputSpacer, BorderLayout.WEST);
+        bottomPanel.add(inputScroll, BorderLayout.CENTER);
+
+        inputSpacer.setPreferredSize(new Dimension(0, 0));
+
+        frame.add(bottomPanel, BorderLayout.SOUTH);
         // NEW: Add window listener to deselect everything on close (resets transient selection state)
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -157,11 +193,15 @@ public class ArkIVv7 {
 
         loadTasks();
         frame.setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+            inputSpacer.setPreferredSize(new Dimension(splitPane.getDividerLocation() + 1, 0));
+            bottomPanel.revalidate();
+        });
     }
 
 
     private void createTask() {
-        JTextArea inputArea = (JTextArea) ((JViewport)((JScrollPane)frame.getContentPane().getComponent(1)).getComponent(0)).getComponent(0);
         String text = inputArea.getText().trim();
         if (!text.isEmpty()) {
             addTaskFromInput(text);
@@ -631,7 +671,7 @@ public class ArkIVv7 {
             JPanel panel = new JPanel(new BorderLayout());
             panel.setBackground(UniversalThemes.BG_MAIN);
 
-            JTextArea field = new JTextArea(getRawText(), 3, 30); // Start with current raw text
+            JTextArea field = new JTextArea(getRawText(), 4, 40); // Start with current raw text
             field.setBackground(UniversalThemes.BG_PANEL);
             field.setForeground(UniversalThemes.TXT_PRIMARY);
             field.setCaretColor(UniversalThemes.ACCENT_COLOR);
@@ -813,13 +853,14 @@ public class ArkIVv7 {
             JPanel panel = new JPanel(new BorderLayout());
             panel.setBackground(UniversalThemes.BG_MAIN);
 
-            JTextArea field = new JTextArea(3, 30); // Start with 3 visible rows
+            JTextArea field = new JTextArea(4, 40); // Start with 3 visible rows
             field.setBackground(UniversalThemes.BG_PANEL);
             field.setForeground(UniversalThemes.TXT_PRIMARY);
             field.setCaretColor(UniversalThemes.ACCENT_COLOR);
 
             JScrollPane scrollPane = new JScrollPane(field);
             scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR, 1));
+            UniversalThemes.applyScrollbarTheme(scrollPane);
 
             panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             field.setFont(UniversalThemes.getCompositeFont(20));

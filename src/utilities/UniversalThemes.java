@@ -160,7 +160,7 @@ public class UniversalThemes {
             @Override
             protected void configureScrollBarColors() {
                 this.thumbColor = UniversalThemes.ACCENT_COLOR; // Orange
-                this.trackColor = UniversalThemes.BG_PANEL;     // Dark background
+                this.trackColor = UniversalThemes.BG_COMPONENT;     // Dark background
             }
 
             @Override
