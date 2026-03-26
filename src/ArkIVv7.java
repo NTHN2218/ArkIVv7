@@ -1,5 +1,3 @@
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -32,10 +30,6 @@ public class ArkIVv7 {
     private static final String IV = "dataEncryptIV328";
     private JTextArea inputArea;
 
-    private JPanel inputSpacer;
-    private JPanel bottomPanel;
-
-
     private Map<Integer, TaskItem> idToTaskMap = new HashMap<>();
     private List<TaskItem> allTasks = new ArrayList<>();
 
@@ -43,15 +37,7 @@ public class ArkIVv7 {
 
     public ArkIVv7() {
 
-        GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        Rectangle bounds = g.getMaximumWindowBounds();
-        GraphicsDevice gd = g.getDefaultScreenDevice();
-
-        int width = 1200;
-        int height = bounds.height;
-
         frame = new JFrame("ArkIV");
-        //frame.setSize(width, height);
         frame.getContentPane().setBackground(UniversalThemes.BG_MAIN);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -59,9 +45,9 @@ public class ArkIVv7 {
         frame.setLocationRelativeTo(null);
         frame.setResizable(true);
 
+        // ── Task panel + scroll ──────────────────────────────────────────
         taskPanel = new JPanel();
         taskPanel.setBackground(UniversalThemes.BG_MAIN);
-
         taskPanel.setLayout(new BoxLayout(taskPanel, BoxLayout.Y_AXIS));
 
         JScrollPane scrollPane = new JScrollPane(taskPanel);
@@ -71,135 +57,102 @@ public class ArkIVv7 {
         scrollPane.getViewport().setBackground(UniversalThemes.BG_MAIN);
         UniversalThemes.applyScrollbarTheme(scrollPane);
 
-// Sidebar panel (1/4 width, left side)
-        JPanel sidebarPanel = new JPanel();
-        sidebarPanel.setBackground(UniversalThemes.BG_SIDEBAR);
-        sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
-
-// Divider line on the right edge of the sidebar
-        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
-
-// Split pane: sidebar on left, task scroll on right
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebarPanel, scrollPane);
-        splitPane.setResizeWeight(0.225);
-        splitPane.setDividerSize(0);              // thin divider (the border handles visual separation)
-        splitPane.setBorder(null);
-        splitPane.setBackground(UniversalThemes.BG_MAIN);
-
-        splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -> {
-            inputSpacer.setPreferredSize(new Dimension(splitPane.getDividerLocation() + 1, 0));
-            bottomPanel.revalidate();
-        });
-
-// Prevent the divider from being dragged
-        splitPane.setEnabled(false);
-
-        frame.add(splitPane, BorderLayout.CENTER);
-
+        // ── Input area + scroll ──────────────────────────────────────────
         inputArea = new JTextArea(3, 30);
-//      inputArea.setFont(UniversalThemes.UI_FONT_BIG2);
-        inputArea.setFont(UniversalThemes.getCompositeFont(20));  //Provides Emoji support for inputArea, but when entered the taskItem does not recognise it
+        inputArea.setFont(UniversalThemes.getCompositeFont(20));
         inputArea.setBackground(UniversalThemes.BG_COMPONENT);
         inputArea.setForeground(UniversalThemes.TXT_PRIMARY);
         inputArea.setCaretColor(UniversalThemes.ACCENT_COLOR);
-        inputArea.setBorder(BorderFactory.createMatteBorder(1,1, 1,1,UniversalThemes.BORDER_COLOR1));
-
+        inputArea.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UniversalThemes.BORDER_COLOR1));
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
-        inputArea.setMargin(new Insets(8, 8, 8, 8)); // Padding inside text area
+        inputArea.setMargin(new Insets(8, 8, 8, 8));
 
-        // Set up scroll pane
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.getViewport().setBackground(UniversalThemes.BG_PANEL);
         inputScroll.setBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR1)
         );
         UniversalThemes.applyScrollbarTheme(inputScroll);
-
         inputScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         inputScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        inputScroll.setPreferredSize(new Dimension(700, 90)); // Fixed initial size
+        inputScroll.setMinimumSize(new Dimension(0, 60));
+        inputScroll.setPreferredSize(new Dimension(0, 90));
 
-        // Auto-grow implementation
+        // Auto-grow input area
         inputArea.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) {
-                adjustTextAreaHeight();
-            }
+            public void insertUpdate(DocumentEvent e)  { adjustHeight(); }
+            public void removeUpdate(DocumentEvent e)  { adjustHeight(); }
+            public void changedUpdate(DocumentEvent e) { adjustHeight(); }
 
-            public void removeUpdate(DocumentEvent e) {
-                adjustTextAreaHeight();
-            }
-
-            public void changedUpdate(DocumentEvent e) {
-                adjustTextAreaHeight();
-            }
-
-            private void adjustTextAreaHeight() {
+            private void adjustHeight() {
                 int rows = inputArea.getLineCount();
                 if (rows > inputArea.getRows()) {
-                    inputArea.setRows(Math.min(rows, 10)); // Max 10 visible rows
+                    inputArea.setRows(Math.min(rows, 10));
                     inputScroll.revalidate();
                 }
             }
         });
 
-        // Key bindings for Shift+Enter (new line) and Enter (submit)
+        // Key bindings: Shift+Enter = new line, Enter = submit
         InputMap im = inputArea.getInputMap(JComponent.WHEN_FOCUSED);
         ActionMap am = inputArea.getActionMap();
 
-        // SHIFT + ENTER → New Line
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), "insert-newline");
         am.put("insert-newline", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int caretPos = inputArea.getCaretPosition();
+                int pos = inputArea.getCaretPosition();
                 String text = inputArea.getText();
-                inputArea.setText(text.substring(0, caretPos) + "\n" + text.substring(caretPos));
-                inputArea.setCaretPosition(caretPos + 1); // Move cursor to new line
+                inputArea.setText(text.substring(0, pos) + "\n" + text.substring(pos));
+                inputArea.setCaretPosition(pos + 1);
             }
         });
 
-        // ENTER → Submit Note
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "submit-note");
         am.put("submit-note", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                createTask(); // existing task creation method
+                createTask();
             }
         });
 
-        inputSpacer = new JPanel();
-        inputSpacer.setBackground(UniversalThemes.BG_SIDEBAR);
-        inputSpacer.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, UniversalThemes.BORDER_COLOR2));
+        // ── Sidebar ──────────────────────────────────────────────────────
+        JPanel sidebarPanel = new JPanel();
+        sidebarPanel.setBackground(UniversalThemes.BG_SIDEBAR);
+        sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
+        sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
 
+        // ── Inner split: tasks (top) + input (bottom) ────────────────────
+        JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, inputScroll);
+        innerSplitPane.setResizeWeight(0.96);   // tasks absorb all extra space
+        innerSplitPane.setDividerSize(0);
+        innerSplitPane.setBorder(null);
+        innerSplitPane.setBackground(UniversalThemes.BG_MAIN);
+        innerSplitPane.setEnabled(false);      // lock divider, input height is fixed
 
-        bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setBackground(UniversalThemes.BG_MAIN);
-        bottomPanel.add(inputSpacer, BorderLayout.WEST);
-        bottomPanel.add(inputScroll, BorderLayout.CENTER);
+        // ── Outer split: sidebar (left) + inner split (right) ────────────
+        JSplitPane outerSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sidebarPanel, innerSplitPane);
+        outerSplitPane.setResizeWeight(0.225);
+        outerSplitPane.setDividerSize(0);
+        outerSplitPane.setBorder(null);
+        outerSplitPane.setBackground(UniversalThemes.BG_MAIN);
+        outerSplitPane.setEnabled(false);
 
-        inputSpacer.setPreferredSize(new Dimension(0, 0));
+        frame.add(outerSplitPane, BorderLayout.CENTER);
 
-        frame.add(bottomPanel, BorderLayout.SOUTH);
-        // NEW: Add window listener to deselect everything on close (resets transient selection state)
+        // ── Window close handler ─────────────────────────────────────────
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                deselectAll();  // Clean up selection before exit (no impact on saved "done" state)
-                // Save is already called on moves/edits, but force one last save if needed
+                deselectAll();
                 saveTasks();
             }
         });
 
         loadTasks();
         frame.setVisible(true);
-
-        SwingUtilities.invokeLater(() -> {
-            inputSpacer.setPreferredSize(new Dimension(splitPane.getDividerLocation() + 1, 0));
-            bottomPanel.revalidate();
-        });
     }
-
 
     private void createTask() {
         String text = inputArea.getText().trim();
@@ -225,8 +178,6 @@ public class ArkIVv7 {
         taskPanel.revalidate();
         taskPanel.repaint();
     }
-
-
 
     private void addTaskFromInput(String text) {
         text = text.trim();
