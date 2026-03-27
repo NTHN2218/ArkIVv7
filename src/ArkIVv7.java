@@ -30,6 +30,14 @@ public class ArkIVv7 {
     private static final String IV = "dataEncryptIV328";
     private JTextArea inputArea;
 
+    private JPanel sidebarPanel;
+
+    private JMenuBar sideBarMenuBar;
+    private JMenu menuHelp;
+    private JMenu menuSettings;
+
+
+
     private Map<Integer, TaskItem> idToTaskMap = new HashMap<>();
     private List<TaskItem> allTasks = new ArrayList<>();
 
@@ -63,16 +71,14 @@ public class ArkIVv7 {
         inputArea.setBackground(UniversalThemes.BG_COMPONENT);
         inputArea.setForeground(UniversalThemes.TXT_PRIMARY);
         inputArea.setCaretColor(UniversalThemes.ACCENT_COLOR);
-        inputArea.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, UniversalThemes.BORDER_COLOR1));
+        inputArea.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 1, UniversalThemes.BORDER_COLOR1));
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
         inputArea.setMargin(new Insets(8, 8, 8, 8));
 
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.getViewport().setBackground(UniversalThemes.BG_PANEL);
-        inputScroll.setBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR1)
-        );
+        inputScroll.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR1));
         UniversalThemes.applyScrollbarTheme(inputScroll);
         inputScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         inputScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -118,10 +124,11 @@ public class ArkIVv7 {
         });
 
         // ── Sidebar ──────────────────────────────────────────────────────
-        JPanel sidebarPanel = new JPanel();
+        sidebarPanel = new JPanel();
         sidebarPanel.setBackground(UniversalThemes.BG_SIDEBAR);
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
         sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
+        createSideBarMenu();
 
         // ── Inner split: tasks (top) + input (bottom) ────────────────────
         JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, inputScroll);
@@ -177,6 +184,51 @@ public class ArkIVv7 {
         // Optional: Repaint panel to ensure visuals update immediately
         taskPanel.revalidate();
         taskPanel.repaint();
+    }
+
+    private void createSideBarMenu() {
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBackground(UniversalThemes.BG_SIDEBAR);
+        menuBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UniversalThemes.BORDER_COLOR2));
+
+        JMenu settingsMenu = createSidebarMenu("Settings");
+        JMenu helpMenu     = createSidebarMenu("Help");
+
+        menuBar.add(settingsMenu);
+        menuBar.add(helpMenu);
+
+
+        int menuHeight = menuBar.getPreferredSize().height;
+        menuBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, menuHeight));
+        menuBar.setMinimumSize(new Dimension(0, menuHeight));
+        menuBar.setPreferredSize(new Dimension(0, menuHeight));  // 0 width lets BoxLayout control it
+
+        JPanel menuWrapper = new JPanel(new BorderLayout());
+        menuWrapper.setBackground(UniversalThemes.BG_SIDEBAR);
+        menuWrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, menuHeight));
+        menuWrapper.setMinimumSize(new Dimension(0, menuHeight));
+        menuWrapper.setPreferredSize(new Dimension(0, menuHeight));
+        menuWrapper.add(menuBar, BorderLayout.CENTER);
+
+        sidebarPanel.add(menuWrapper);
+    }
+
+    private JMenu createSidebarMenu(String label) {
+        JMenu menu = new JMenu(label);
+        menu.setFont(UniversalThemes.UI_FONT_SMALL3);
+        menu.setForeground(UniversalThemes.TXT_PRIMARY);
+        menu.setBackground(UniversalThemes.BG_SIDEBAR);
+        menu.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        return menu;
+    }
+
+    private JMenuItem createSidebarMenuItem(String label) {
+        JMenuItem item = new JMenuItem(label);
+        item.setFont(UniversalThemes.UI_FONT_BIG);
+        item.setForeground(UniversalThemes.TXT_PRIMARY);
+        item.setBackground(UniversalThemes.BG_COMPONENT);
+        item.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        return item;
     }
 
     private void addTaskFromInput(String text) {
@@ -512,11 +564,11 @@ public class ArkIVv7 {
             add(leftPanel, BorderLayout.CENTER);
             add(buttonPanel, BorderLayout.EAST);
 
-            // New: Add key bindings for Ctrl+Shift+W (move up) and Ctrl+Shift+S (move down)  
+            // New: Add key bindings for Ctrl+UpArrow (move up) and Ctrl+DownArrow (move down)
             InputMap im = this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             ActionMap am = this.getActionMap();
 
-            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "moveUp");
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK), "moveUp");
             am.put("moveUp", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -526,7 +578,7 @@ public class ArkIVv7 {
                 }
             });
 
-            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "moveDown");
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK), "moveDown");
             am.put("moveDown", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
