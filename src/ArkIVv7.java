@@ -15,15 +15,15 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
 import utilities.UniversalThemes;
-import utilities.AssetPathResolver;
+import utilities.PathResolver;
 
 
-public class ArkIVv7 {
+public class ArkIVv7 implements ActionListener{
     private JFrame frame;
     private JPanel taskPanel;
     private JTextField inputField;
     private int taskCounter = 1;
-    private final String FILE_NAME = AssetPathResolver.getDataFilePath();
+    private final String FILE_NAME = PathResolver.getDataFilePath();
 
     private static final String SECRET_KEY = "dataEncryptKey15";
     private static final String SALT = "dataEncryptSalt7";
@@ -36,12 +36,11 @@ public class ArkIVv7 {
     private JMenu menuHelp;
     private JMenu menuSettings;
 
-
-
     private Map<Integer, TaskItem> idToTaskMap = new HashMap<>();
     private List<TaskItem> allTasks = new ArrayList<>();
 
     private TaskItem selectedTask = null;
+
 
     public ArkIVv7() {
 
@@ -124,11 +123,26 @@ public class ArkIVv7 {
         });
 
         // ── Sidebar ──────────────────────────────────────────────────────
-        sidebarPanel = new JPanel();
+        sidebarPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                g2.setColor(UniversalThemes.BORDER_COLOR2);
+                g2.setStroke(new BasicStroke(1f));
+//                g2.drawLine(0, 80, getWidth() , 80);
+
+                g2.dispose();
+            }
+        };
         sidebarPanel.setBackground(UniversalThemes.BG_SIDEBAR);
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
         sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
         createSideBarMenu();
+
+
 
         // ── Inner split: tasks (top) + input (bottom) ────────────────────
         JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, inputScroll);
@@ -161,6 +175,8 @@ public class ArkIVv7 {
         frame.setVisible(true);
     }
 
+
+
     private void createTask() {
         String text = inputArea.getText().trim();
         if (!text.isEmpty()) {
@@ -191,12 +207,49 @@ public class ArkIVv7 {
         menuBar.setBackground(UniversalThemes.BG_SIDEBAR);
         menuBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UniversalThemes.BORDER_COLOR2));
 
+        //Menu
+        JMenu fileMenu     = createSidebarMenu("File");
+        JMenu editMenu     = createSidebarMenu("Edit");
         JMenu settingsMenu = createSidebarMenu("Settings");
         JMenu helpMenu     = createSidebarMenu("Help");
 
+        //File
+        JMenuItem newEntry    = createSidebarMenuItem("New Entry");
+        JMenuItem importData  = createSidebarMenuItem("Import Data");
+        JMenuItem exportData  = createSidebarMenuItem("Export Data");
+        JMenuItem backupData  = createSidebarMenuItem("Backup Data");
+        JMenuItem restoreData = createSidebarMenuItem("Restore Data");
+        JMenuItem clearAll    = createSidebarMenuItem("Clear All");
+        JMenuItem exit        = createSidebarMenuItem("Exit");
+
+        //Edit
+        JMenuItem undo        = createSidebarMenuItem("Undo");
+        JMenuItem redo        = createSidebarMenuItem("Redo");
+        JMenuItem collapse    = createSidebarMenuItem("Collapse All");
+        JMenuItem expand      = createSidebarMenuItem("Expand All");
+
+        //Settings
+        JMenuItem preferences = createSidebarMenuItem("Preferences");
+
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
         menuBar.add(settingsMenu);
         menuBar.add(helpMenu);
 
+        fileMenu.add(newEntry);
+        fileMenu.add(importData);
+        fileMenu.add(exportData);
+        fileMenu.add(backupData);
+        fileMenu.add(restoreData);
+        fileMenu.add(clearAll);
+        fileMenu.add(exit);
+
+        editMenu.add(undo);
+        editMenu.add(redo);
+        editMenu.add(collapse);
+        editMenu.add(expand);
+
+        settingsMenu.add(preferences);
 
         int menuHeight = menuBar.getPreferredSize().height;
         menuBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, menuHeight));
@@ -224,10 +277,10 @@ public class ArkIVv7 {
 
     private JMenuItem createSidebarMenuItem(String label) {
         JMenuItem item = new JMenuItem(label);
-        item.setFont(UniversalThemes.UI_FONT_BIG);
+        item.setFont(UniversalThemes.UI_FONT_SMALL3);
         item.setForeground(UniversalThemes.TXT_PRIMARY);
         item.setBackground(UniversalThemes.BG_COMPONENT);
-        item.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        item.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
         return item;
     }
 
@@ -400,7 +453,12 @@ public class ArkIVv7 {
         SwingUtilities.invokeLater(ArkIVv7::new);
     }
 
-    private class TaskItem extends JPanel {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+    }
+
+    public class TaskItem extends JPanel {
         private int id;
         private int parentId;
         private boolean isSubtask;
@@ -949,12 +1007,12 @@ public class ArkIVv7 {
             dialog.setLocationRelativeTo(frame);
             dialog.setVisible(true);
         }
-        // New method: Move this task up within its allowed range, allowing repeated moves while selected  
+        // New method: Move this task up within its allowed range, allowing repeated moves while selected
         private void moveTaskUp() {
             int currentIndex = -1;
             int count = taskPanel.getComponentCount();
 
-            // Find current index in taskPanel  
+            // Find current index in taskPanel
             for (int i = 0; i < count; i++) {
                 if (taskPanel.getComponent(i) == this) {
                     currentIndex = i;
@@ -962,9 +1020,9 @@ public class ArkIVv7 {
                 }
             }
 
-            if (currentIndex <= 0) return; // Already at top or not found  
+            if (currentIndex <= 0) return; // Already at top or not found
 
-            // If main task and open, collapse it first  
+            // If main task and open, collapse it first
             if (!isSubtask && !isCollapsed) {
                 isCollapsed = true;
                 Border newOuter = BorderFactory.createMatteBorder(1, 0, 20, 0, Color.LIGHT_GRAY);
@@ -980,7 +1038,7 @@ public class ArkIVv7 {
                 hideSubtasks(this);
             }
 
-            // Find the index of the task above to swap with, respecting main/subtask boundaries  
+            // Find the index of the task above to swap with, respecting main/subtask boundaries
             int swapIndex = -1;
             for (int i = currentIndex - 1; i >= 0; i--) {
                 Component comp = taskPanel.getComponent(i);
@@ -993,7 +1051,7 @@ public class ArkIVv7 {
                         } else if (!t.isSubtask()) {
                             break;
                         }
-                    } else { // main task  
+                    } else { // main task
                         if (!t.isSubtask()) {
                             swapIndex = i;
                             break;
@@ -1002,9 +1060,9 @@ public class ArkIVv7 {
                 }
             }
 
-            if (swapIndex == -1) return; // No valid task above to swap with  
+            if (swapIndex == -1) return; // No valid task above to swap with
 
-            // Swap components in taskPanel  
+            // Swap components in taskPanel
             Component aboveComp = taskPanel.getComponent(swapIndex);
             taskPanel.remove(this);
             taskPanel.remove(aboveComp);
@@ -1015,7 +1073,7 @@ public class ArkIVv7 {
             taskPanel.revalidate();
             taskPanel.repaint();
 
-            // Update allTasks list to keep consistent  
+            // Update allTasks list to keep consistent
             int allTasksIndexThis = allTasks.indexOf(this);
             int allTasksIndexAbove = allTasks.indexOf(aboveComp);
             if (allTasksIndexThis != -1 && allTasksIndexAbove != -1) {
@@ -1025,11 +1083,11 @@ public class ArkIVv7 {
 
             saveTasks();
 
-            // Ensure this task remains selected and focused for continuous moves  
+            // Ensure this task remains selected and focused for continuous moves
             if (!isSelected) {
                 selectThisTask();
             }
-            // Request focus on checkbox or text area to keep key events firing  
+            // Request focus on checkbox or text area to keep key events firing
             SwingUtilities.invokeLater(() -> {
                 if (isSelected) {
                     textArea.requestFocusInWindow();
@@ -1037,12 +1095,12 @@ public class ArkIVv7 {
             });
         }
 
-        // New method: Move this task down within its allowed range, allowing repeated moves while selected  
+        // New method: Move this task down within its allowed range, allowing repeated moves while selected
         private void moveTaskDown() {
             int currentIndex = -1;
             int count = taskPanel.getComponentCount();
 
-            // Find current index in taskPanel  
+            // Find current index in taskPanel
             for (int i = 0; i < count; i++) {
                 if (taskPanel.getComponent(i) == this) {
                     currentIndex = i;
@@ -1050,9 +1108,9 @@ public class ArkIVv7 {
                 }
             }
 
-            if (currentIndex == -1 || currentIndex >= count - 1) return; // Already at bottom or not found  
+            if (currentIndex == -1 || currentIndex >= count - 1) return; // Already at bottom or not found
 
-            // If main task and open, collapse it first  
+            // If main task and open, collapse it first
             if (!isSubtask && !isCollapsed) {
                 isCollapsed = true;
                 Border newOuter = BorderFactory.createMatteBorder(1, 0, 20, 0, Color.LIGHT_GRAY);
@@ -1068,7 +1126,7 @@ public class ArkIVv7 {
                 hideSubtasks(this);
             }
 
-            // Find the index of the task below to swap with, respecting main/subtask boundaries  
+            // Find the index of the task below to swap with, respecting main/subtask boundaries
             int swapIndex = -1;
             for (int i = currentIndex + 1; i < count; i++) {
                 Component comp = taskPanel.getComponent(i);
@@ -1081,7 +1139,7 @@ public class ArkIVv7 {
                         } else if (!t.isSubtask()) {
                             break;
                         }
-                    } else { // main task  
+                    } else { // main task
                         if (!t.isSubtask()) {
                             swapIndex = i;
                             break;
@@ -1090,9 +1148,9 @@ public class ArkIVv7 {
                 }
             }
 
-            if (swapIndex == -1) return; // No valid task below to swap with  
+            if (swapIndex == -1) return; // No valid task below to swap with
 
-            // Swap components in taskPanel  
+            // Swap components in taskPanel
             Component belowComp = taskPanel.getComponent(swapIndex);
             taskPanel.remove(this);
             taskPanel.remove(belowComp);
@@ -1103,7 +1161,7 @@ public class ArkIVv7 {
             taskPanel.revalidate();
             taskPanel.repaint();
 
-            // Update allTasks list to keep consistent  
+            // Update allTasks list to keep consistent
             int allTasksIndexThis = allTasks.indexOf(this);
             int allTasksIndexBelow = allTasks.indexOf(belowComp);
             if (allTasksIndexThis != -1 && allTasksIndexBelow != -1) {
@@ -1113,11 +1171,11 @@ public class ArkIVv7 {
 
             saveTasks();
 
-            // Ensure this task remains selected and focused for continuous moves  
+            // Ensure this task remains selected and focused for continuous moves
             if (!isSelected) {
                 selectThisTask();
             }
-            // Request focus on checkbox or text area to keep key events firing  
+            // Request focus on checkbox or text area to keep key events firing
             SwingUtilities.invokeLater(() -> {
                 if (isSelected) {
                     textArea.requestFocusInWindow();

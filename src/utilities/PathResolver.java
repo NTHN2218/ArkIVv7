@@ -1,9 +1,8 @@
-
 package utilities;
 
 import java.io.File;
 
-public class AssetPathResolver {
+public class PathResolver {
 
     private static String cachedAssetsPath = null;
     private static String cachedDataFilePath = null;
@@ -54,7 +53,7 @@ public class AssetPathResolver {
      */
     private static String getApplicationRoot() {
         try {
-            String path = AssetPathResolver.class
+            String path = PathResolver.class
                     .getProtectionDomain()
                     .getCodeSource()
                     .getLocation()
