@@ -14,10 +14,13 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
+import utilities.UniversalFactory;
 import utilities.UniversalThemes;
 import utilities.PathResolver;
 
-
+import Menu.FileMenu;
+import Menu.EditMenu;
+import Menu.SettingsMenu;
 public class ArkIVv7 implements ActionListener{
     private JFrame frame;
     private JPanel taskPanel;
@@ -32,16 +35,17 @@ public class ArkIVv7 implements ActionListener{
 
     private JPanel sidebarPanel;
 
-    private JMenuBar sideBarMenuBar;
-    private JMenu menuHelp;
-    private JMenu menuSettings;
+    private JMenuBar menuBar;
+    private JMenu fileMenu, editMenu, settingsMenu, helpMenu;
 
     private Map<Integer, TaskItem> idToTaskMap = new HashMap<>();
     private List<TaskItem> allTasks = new ArrayList<>();
 
     private TaskItem selectedTask = null;
 
-
+    FileMenu Menu_file = new FileMenu();
+    EditMenu Menu_edit = new EditMenu();
+    SettingsMenu Menu_settings = new SettingsMenu();
     public ArkIVv7() {
 
         frame = new JFrame("ArkIV");
@@ -140,9 +144,7 @@ public class ArkIVv7 implements ActionListener{
         sidebarPanel.setBackground(UniversalThemes.BG_SIDEBAR);
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
         sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
-        createSideBarMenu();
-
-
+        createMenuBar();
 
         // ── Inner split: tasks (top) + input (bottom) ────────────────────
         JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, inputScroll);
@@ -202,54 +204,25 @@ public class ArkIVv7 implements ActionListener{
         taskPanel.repaint();
     }
 
-    private void createSideBarMenu() {
-        JMenuBar menuBar = new JMenuBar();
+    private void createMenuBar() {
+        menuBar = new JMenuBar();
         menuBar.setBackground(UniversalThemes.BG_SIDEBAR);
         menuBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, UniversalThemes.BORDER_COLOR2));
 
         //Menu
-        JMenu fileMenu     = createSidebarMenu("File");
-        JMenu editMenu     = createSidebarMenu("Edit");
-        JMenu settingsMenu = createSidebarMenu("Settings");
-        JMenu helpMenu     = createSidebarMenu("Help");
-
-        //File
-        JMenuItem newEntry    = createSidebarMenuItem("New Entry");
-        JMenuItem importData  = createSidebarMenuItem("Import Data");
-        JMenuItem exportData  = createSidebarMenuItem("Export Data");
-        JMenuItem backupData  = createSidebarMenuItem("Backup Data");
-        JMenuItem restoreData = createSidebarMenuItem("Restore Data");
-        JMenuItem clearAll    = createSidebarMenuItem("Clear All");
-        JMenuItem exit        = createSidebarMenuItem("Exit");
-
-        //Edit
-        JMenuItem undo        = createSidebarMenuItem("Undo");
-        JMenuItem redo        = createSidebarMenuItem("Redo");
-        JMenuItem collapse    = createSidebarMenuItem("Collapse All");
-        JMenuItem expand      = createSidebarMenuItem("Expand All");
-
-        //Settings
-        JMenuItem preferences = createSidebarMenuItem("Preferences");
+        fileMenu     = UniversalFactory.createMenuBar("File");
+        editMenu     = UniversalFactory.createMenuBar("Edit");
+        settingsMenu = UniversalFactory.createMenuBar("Settings");
+        helpMenu     = UniversalFactory.createMenuBar("Help");
 
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         menuBar.add(settingsMenu);
         menuBar.add(helpMenu);
 
-        fileMenu.add(newEntry);
-        fileMenu.add(importData);
-        fileMenu.add(exportData);
-        fileMenu.add(backupData);
-        fileMenu.add(restoreData);
-        fileMenu.add(clearAll);
-        fileMenu.add(exit);
-
-        editMenu.add(undo);
-        editMenu.add(redo);
-        editMenu.add(collapse);
-        editMenu.add(expand);
-
-        settingsMenu.add(preferences);
+        createFileMenu();
+        createEditMenu();
+        createSettingsMenu();
 
         int menuHeight = menuBar.getPreferredSize().height;
         menuBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, menuHeight));
@@ -266,22 +239,103 @@ public class ArkIVv7 implements ActionListener{
         sidebarPanel.add(menuWrapper);
     }
 
-    private JMenu createSidebarMenu(String label) {
-        JMenu menu = new JMenu(label);
-        menu.setFont(UniversalThemes.UI_FONT_SMALL3);
-        menu.setForeground(UniversalThemes.TXT_PRIMARY);
-        menu.setBackground(UniversalThemes.BG_SIDEBAR);
-        menu.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-        return menu;
+    private void createFileMenu(){
+
+        JMenuItem newEntry    = UniversalFactory.createMenuBarItem("New Entry");
+        newEntry.addActionListener(this);
+        newEntry.setActionCommand("New Entry");
+
+        JMenuItem importData  = UniversalFactory.createMenuBarItem("Import Data");
+        importData.addActionListener(this);
+        importData.setActionCommand("Import Data");
+
+        JMenuItem exportData  = UniversalFactory.createMenuBarItem("Export Data");
+        exportData.addActionListener(this);
+        exportData.setActionCommand("Export Data");
+
+        JMenuItem backupData  = UniversalFactory.createMenuBarItem("Backup Data");
+        backupData.addActionListener(this);
+        backupData.setActionCommand("Backup Data");
+
+        JMenuItem restoreData = UniversalFactory.createMenuBarItem("Restore Data");
+        restoreData.addActionListener(this);
+        restoreData.setActionCommand("Restore Data");
+
+        JMenuItem clearAll    = UniversalFactory.createMenuBarItem("Clear All");
+        clearAll.addActionListener(this);
+        clearAll.setActionCommand("Clear All");
+
+        JMenuItem exit        = UniversalFactory.createMenuBarItem("Exit");
+        exit.addActionListener(this);
+        exit.setActionCommand("Exit");
+
+        fileMenu.add(newEntry);
+        fileMenu.add(importData);
+        fileMenu.add(exportData);
+        fileMenu.add(backupData);
+        fileMenu.add(restoreData);
+        fileMenu.add(clearAll);
+        fileMenu.add(exit);
+
+    }
+    
+    private void createEditMenu(){
+        JMenuItem undo        = UniversalFactory.createMenuBarItem("Undo");
+        undo.addActionListener(this);
+        undo.setActionCommand("Undo");
+
+        JMenuItem redo        = UniversalFactory.createMenuBarItem("Redo");
+        redo.addActionListener(this);
+        redo.setActionCommand("Redo");
+
+        JMenuItem collapse    = UniversalFactory.createMenuBarItem("Collapse All");
+        collapse.addActionListener(this);
+        collapse.setActionCommand("Collapse All");
+
+        JMenuItem expand      = UniversalFactory.createMenuBarItem("Expand All");
+        expand.addActionListener(this);
+        expand.setActionCommand("Expand All");
+
+        editMenu.add(undo);
+        editMenu.add(redo);
+        editMenu.add(collapse);
+        editMenu.add(expand);
+    }
+    
+    private void createSettingsMenu(){
+        JMenuItem preferences = UniversalFactory.createMenuBarItem("Preferences");
+        preferences.addActionListener(this);
+        preferences.setActionCommand("Preferences");
+
+        settingsMenu.add(preferences);
     }
 
-    private JMenuItem createSidebarMenuItem(String label) {
-        JMenuItem item = new JMenuItem(label);
-        item.setFont(UniversalThemes.UI_FONT_SMALL3);
-        item.setForeground(UniversalThemes.TXT_PRIMARY);
-        item.setBackground(UniversalThemes.BG_COMPONENT);
-        item.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-        return item;
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+
+        switch(command){
+            //File Menu
+            case "New Entry"  : Menu_file.newEntry();   break;
+            case "Import Data": Menu_file.importData(); break;
+            case "Export Data": Menu_file.exportData(); break;
+            case "Backup Data": Menu_file.backupData(); break;
+            case "Restore Data":Menu_file.restoreData();break;
+            case "Clear All": Menu_file.clearAll();break;
+            case "Exit": Menu_file.exit(); break;
+
+            //Edit
+            case "Undo": Menu_edit.undo(); break;
+            case "Redo": Menu_edit.redo(); break;
+            case "Collapse All": Menu_edit.collapseAll(); break;
+            case "Expand All": Menu_edit.expandAll(); break;
+
+            //Settings
+            case "Preferences": Menu_settings.preferences();break;
+
+
+        }
+
     }
 
     private void addTaskFromInput(String text) {
@@ -290,7 +344,8 @@ public class ArkIVv7 implements ActionListener{
             TaskItem task;
             if (selectedTask != null && !selectedTask.isSubtask()) {
                 task = new TaskItem(taskCounter++, text, false, true, false, selectedTask.getId());
-            } else {
+            }
+            else {
                 task = new TaskItem(taskCounter++, text, false, false, false, -1);
             }
             idToTaskMap.put(task.getId(), task);
@@ -332,7 +387,7 @@ public class ArkIVv7 implements ActionListener{
 
                         taskCounter = Math.max(taskCounter, id + 1);
                         TaskItem task = new TaskItem(id, text, done, isSubtask, isCollapsed, parentId);
-                        allTasks.add(task);  // Add in file order (preserves saved/moved order)
+                        allTasks.add(task);  // Add in Menu_file order (preserves saved/moved order)
                         idToTaskMap.put(id, task);
                     }
                 }
@@ -453,10 +508,7 @@ public class ArkIVv7 implements ActionListener{
         SwingUtilities.invokeLater(ArkIVv7::new);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
 
-    }
 
     public class TaskItem extends JPanel {
         private int id;
