@@ -1,9 +1,21 @@
 package Menu;
 
+
+
 public class FileMenu {
 
+    private final Runnable onSave;
+    private final Runnable onDeselect;
+    private final Runnable onFocusInput;
+
+    public FileMenu(Runnable onSave, Runnable onDeselect, Runnable onFocusInput) {
+        this.onSave = onSave;
+        this.onDeselect = onDeselect;
+        this.onFocusInput=onFocusInput;
+    }
+
     public void newEntry(){
-        System.out.println("New Entry Works");
+        onFocusInput.run();
     }
 
     public void importData(){
@@ -27,7 +39,9 @@ public class FileMenu {
     }
 
     public void exit(){
-        System.out.println("Exit is working");
+        onDeselect.run();
+        onSave.run();
+        System.exit(0);
     }
 
 

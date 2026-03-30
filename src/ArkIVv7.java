@@ -43,7 +43,16 @@ public class ArkIVv7 implements ActionListener{
 
     private TaskItem selectedTask = null;
 
-    FileMenu Menu_file = new FileMenu();
+    FileMenu Menu_file = new FileMenu(
+            this::saveTasks,
+            this::deselectAll,
+            () -> SwingUtilities.invokeLater(() -> {
+                inputArea.requestFocusInWindow();
+                UniversalThemes.flashBorder(inputArea, UniversalThemes.ACCENT_COLOR, UniversalThemes.BORDER_COLOR1);
+            })
+    );
+
+
     EditMenu Menu_edit = new EditMenu();
     SettingsMenu Menu_settings = new SettingsMenu();
     public ArkIVv7() {

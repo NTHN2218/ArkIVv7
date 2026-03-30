@@ -424,4 +424,73 @@ public class UniversalThemes {
         return result[0];
     }
 
+    private static boolean menuUiManagerApplied = false;
+
+    public static void applyMenuTheme(JMenu menu) {
+        if (!menuUiManagerApplied) {
+            UIManager.put("PopupMenu.border", BorderFactory.createEmptyBorder());
+            UIManager.put("PopupMenu.background", BG_COMPONENT);
+            UIManager.put("Menu.selectionBackground", BG_SIDEBAR);   // ← kills the dark box
+            UIManager.put("Menu.selectionForeground", ACCENT_COLOR); // ← text color when open
+            menuUiManagerApplied = true;
+        }
+
+        menu.setUI(new javax.swing.plaf.basic.BasicMenuUI() {
+            @Override
+            protected void paintBackground(Graphics g, JMenuItem item, Color bgColor) {
+                // always keep sidebar color, no highlight box on the label
+                g.setColor(BG_SIDEBAR);
+                g.fillRect(0, 0, item.getWidth(), item.getHeight());
+            }
+
+            @Override
+            protected void paintText(Graphics g, JMenuItem item,
+                                     Rectangle textRect, String text) {
+                ButtonModel model = item.getModel();
+                g.setColor((model.isSelected() || model.isArmed())
+                        ? ACCENT_COLOR
+                        : TXT_PRIMARY);
+                super.paintText(g, item, textRect, text);
+            }
+        });
+    }
+
+    public static void applyMenuItemTheme(JMenuItem item) {
+        item.setUI(new javax.swing.plaf.basic.BasicMenuItemUI() {
+            @Override
+            protected void paintBackground(Graphics g, JMenuItem menuItem, Color bgColor) {
+                ButtonModel model = menuItem.getModel();
+                Color bg = model.isArmed() ? ACCENT_COLOR : BG_COMPONENT;
+                g.setColor(bg);
+                g.fillRect(0, 0, menuItem.getWidth(), menuItem.getHeight());
+            }
+
+            @Override
+            protected void paintText(Graphics g, JMenuItem menuItem,
+                                     Rectangle textRect, String text) {
+                ButtonModel model = menuItem.getModel();
+                g.setColor(model.isArmed() ? BG_MAIN : TXT_PRIMARY);
+                super.paintText(g, menuItem, textRect, text);
+            }
+        });
+    }
+
+    public static void flashBorder(JComponent component, Color flashColor, Color normalColor) {
+        final int[] count = {0};
+        Timer timer = new Timer(100, null);
+        timer.addActionListener(e -> {
+            if (count[0] % 2 == 0) {
+                component.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, flashColor));
+            } else {
+                component.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, normalColor));
+            }
+            count[0]++;
+            if (count[0] >= 6) { // 3 flashes
+                ((Timer) e.getSource()).stop();
+                component.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, normalColor));
+            }
+        });
+        timer.start();
+    }
+
 }
