@@ -173,17 +173,17 @@ public class UniversalThemes {
 
                 // Fill thumb
                 g2.setColor(thumbColor);
-                g2.fillRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height);
+                g2.fillRect(thumbBounds.x+3, thumbBounds.y, thumbBounds.width-3, thumbBounds.height);
 
 // Draw inner black rectangle with a 1px margin on all sides
                 g2.setColor(Color.BLACK);
                 g2.setStroke(new BasicStroke(1f));
-                g2.drawRect(
-                        thumbBounds.x + 1,                // move 1px right
-                        thumbBounds.y + 1,                // little top margin (optional)
-                        thumbBounds.width - 3,            // shrink width so right side isn't clipped
-                        thumbBounds.height - 3            // shrink height to match style
-                );
+//                g2.drawRect(
+//                        thumbBounds.x + 1,                // move 1px right
+//                        thumbBounds.y + 1,                // little top margin (optional)
+//                        thumbBounds.width - 3,            // shrink width so right side isn't clipped
+//                        thumbBounds.height - 3            // shrink height to match style
+//                );
                 g2.dispose();
             }
 
@@ -199,9 +199,96 @@ public class UniversalThemes {
             public Dimension getPreferredSize(JComponent c) {
                 return new Dimension(12, super.getPreferredSize(c).height);
             }
+
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                button.setMinimumSize(new Dimension(0, 0));
+                button.setMaximumSize(new Dimension(0, 0));
+                return button;
+            }
         });
 
+        scrollPane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
+
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = UniversalThemes.ACCENT_COLOR; // Orange
+                this.trackColor = UniversalThemes.BG_SIDEBAR;     // Dark background
+            }
+
+            @Override
+            protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Fill thumb
+                g2.setColor(thumbColor);
+                g2.fillRect(thumbBounds.x, thumbBounds.y+3, thumbBounds.width, thumbBounds.height+3);
+
+// Draw inner black rectangle with a 1px margin on all sides
+                g2.setColor(Color.BLACK);
+                g2.setStroke(new BasicStroke(1f));
+//                g2.drawRect(
+//                        thumbBounds.x + 1,                // move 1px right
+//                        thumbBounds.y + 1,                // little top margin (optional)
+//                        thumbBounds.width - 3,            // shrink width so right side isn't clipped
+//                        thumbBounds.height - 3            // shrink height to match style
+//                );
+                g2.dispose();
+            }
+
+            @Override
+            protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(trackColor);
+                g2.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
+                g2.dispose();
+            }
+
+            @Override
+            public Dimension getPreferredSize(JComponent c) {
+                return new Dimension( super.getPreferredSize(c).width,12);
+            }
+
+            @Override
+            protected JButton createDecreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            @Override
+            protected JButton createIncreaseButton(int orientation) {
+                return createZeroButton();
+            }
+
+            private JButton createZeroButton() {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(0, 0));
+                button.setMinimumSize(new Dimension(0, 0));
+                button.setMaximumSize(new Dimension(0, 0));
+                return button;
+            }
+        });
+
+        scrollPane.setCorner(
+                JScrollPane.LOWER_RIGHT_CORNER,
+                new JPanel() {{
+                    setBackground(UniversalThemes.BG_PANEL); // match your UI
+                }}
+        );
+
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
     }
 
     public static void applyCheckBoxTheme(JCheckBox checkBox) {

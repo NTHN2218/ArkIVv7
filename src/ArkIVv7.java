@@ -43,6 +43,9 @@ public class ArkIVv7 implements ActionListener{
 
     private TaskItem selectedTask = null;
 
+    private JDialog dialog;
+
+    //to call private methods in this class from FileMenu.java
     FileMenu Menu_file = new FileMenu(
             this::saveTasks,
             this::deselectAll,
@@ -55,6 +58,7 @@ public class ArkIVv7 implements ActionListener{
 
     EditMenu Menu_edit = new EditMenu();
     SettingsMenu Menu_settings = new SettingsMenu();
+
     public ArkIVv7() {
 
         frame = new JFrame("ArkIV");
@@ -612,16 +616,16 @@ public class ArkIVv7 implements ActionListener{
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttonPanel.setOpaque(false);
 
-            JButton editButton = new JButton(" ✎ ");
-            editButton.setText("<html><div style='margin-top:3px;'>✎</div></html>");
-
-            editButton.setFont(UniversalThemes.UI_FONT_EMOJI);
-            editButton.setBackground(UniversalThemes.ACCENT_COLOR);
-            editButton.setForeground(UniversalThemes.TXT_SELECTED);
-            editButton.setBorder(new LineBorder(UniversalThemes.ACCENT_COLOR_DARK, 2));
-            editButton.setPreferredSize(new Dimension(40, 29));
-            UniversalThemes.ClickEffect(editButton);
-            editButton.addActionListener(e -> editTask());
+//            JButton editButton = new JButton(" ✎ ");
+//            editButton.setText("<html><div style='margin-top:3px;'>✎</div></html>");
+//
+//            editButton.setFont(UniversalThemes.UI_FONT_EMOJI);
+//            editButton.setBackground(UniversalThemes.ACCENT_COLOR);
+//            editButton.setForeground(UniversalThemes.TXT_SELECTED);
+//            editButton.setBorder(new LineBorder(UniversalThemes.ACCENT_COLOR_DARK, 2));
+//            editButton.setPreferredSize(new Dimension(40, 29));
+//            UniversalThemes.ClickEffect(editButton);
+//            editButton.addActionListener(e -> editTask());
 
             JButton deleteButton = new JButton(" \uD83D\uDDD1\uFE0F ");
             deleteButton.setText("<html><div style='margin-top:3px;'>🗑️</div></html>");
@@ -635,7 +639,7 @@ public class ArkIVv7 implements ActionListener{
 
             deleteButton.addActionListener(e -> confirmDeleteTask());
 
-            buttonPanel.add(editButton);
+//            buttonPanel.add(editButton);
             buttonPanel.add(deleteButton);
 
             if (!isSubtask) {
@@ -686,6 +690,16 @@ public class ArkIVv7 implements ActionListener{
             // New: Add key bindings for Ctrl+UpArrow (move up) and Ctrl+DownArrow (move down)
             InputMap im = this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             ActionMap am = this.getActionMap();
+
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK), "Edit");
+            am.put("Edit", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(isSelected){
+                        editTask();
+                    }
+                }
+            });
 
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK), "moveUp");
             am.put("moveUp", new AbstractAction() {
@@ -880,10 +894,10 @@ public class ArkIVv7 implements ActionListener{
                         if (isDone) {
                             // Apply strikethrough and gray if "done"
 //                             textArea.setText(newText.replaceAll(".", "̶$0"));
-                            textArea.setForeground(Color.GRAY);
                         } else {
                             textArea.setForeground(UniversalThemes.TXT_PRIMARY);
                         }
+                        deselectThisTask();
                         saveTasks(); // Now saves the updated (raw or decorated) text
                     } else {
                         // Optional: Confirm deletion if text is empty
@@ -894,7 +908,10 @@ public class ArkIVv7 implements ActionListener{
                         );
 
                         if (confirmed) {
-                            confirmDeleteTask(); // Reuse existing delete logic
+                            deselectThisTask();
+                            JDialog dialog = (JDialog) SwingUtilities.getWindowAncestor(panel);
+                            if (dialog != null) dialog.dispose();
+                            DeleteEmptyTask();
                             return; // Don't dispose below
                         }
 
@@ -931,7 +948,41 @@ public class ArkIVv7 implements ActionListener{
             dialog.pack();
             dialog.setMinimumSize(new Dimension(600, 200));
             dialog.setLocationRelativeTo(frame);
+            dialog.addWindowListener(new WindowAdapter() {  //Handles dialog window closing
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    deselectThisTask();
+                }
+            });
             dialog.setVisible(true);
+
+
+
+        }
+
+        private void DeleteEmptyTask() {
+            List<Component> toRemove = new ArrayList<>();
+            toRemove.add(this); // Always remove the clicked task
+            boolean hasSubtasks = false;
+
+            if (!isSubtask) {
+                // It's a main task, so find and mark its subtasks
+                for (TaskItem task : allTasks) {
+                    if (task.isSubtask() && task.getParentId() == this.id) {
+                        toRemove.add(task);
+                        hasSubtasks = true;
+                    }
+                }
+            }
+
+                for (Component c : toRemove) {
+                    taskPanel.remove(c);
+                    allTasks.remove(c);
+                }
+                saveTasks();
+                taskPanel.revalidate();
+                taskPanel.repaint();
+
         }
 
         private void confirmDeleteTask() {
