@@ -1,6 +1,7 @@
 package utilities;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class UniversalFactory {
 
@@ -25,6 +26,16 @@ public class UniversalFactory {
         ));
         UniversalThemes.applyMenuItemTheme(item);
         return item;
+    }
+
+    public static JTextField createTextField(int x, int y, int width, int height, Color bgColor, Color fgColor, Color caretColor)
+    {
+        JTextField textfield = new JTextField();
+        textfield.setBounds(x, y, width, height);
+        textfield.setBackground(bgColor);
+        textfield.setForeground(fgColor);
+        textfield.setCaretColor(caretColor);
+        return textfield;
     }
 
 }

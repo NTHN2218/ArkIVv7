@@ -29,18 +29,18 @@ public class PathResolver {
     }
 
     /**
-     * Returns the absolute path to assets/data.txt
+     * Returns the absolute path to assets/data.json
      */
     public static String getDataFilePath() {
         if (cachedDataFilePath != null) {
             return cachedDataFilePath;
         }
 
-        File dataFile = new File(getAssetsPath(), "data.txt");
+        File dataFile = new File(getAssetsPath(), "data.json");
 
         if (!dataFile.exists() || !dataFile.isFile()) {
             throw new RuntimeException(
-                    "data.txt not found at: " + dataFile.getAbsolutePath()
+                    "data.json not found at: " + dataFile.getAbsolutePath()
             );
         }
 
@@ -94,7 +94,7 @@ public class PathResolver {
         try {
             System.out.println("Validating assets...");
             System.out.println("Assets path: " + getAssetsPath());
-            System.out.println("✓ data.txt found at: " + getDataFilePath());
+            System.out.println("✓ data.json found at: " + getDataFilePath());
         } catch (RuntimeException e) {
             System.err.println("✗ Asset validation failed: " + e.getMessage());
             throw e;

@@ -21,6 +21,9 @@ import utilities.PathResolver;
 import Menu.FileMenu;
 import Menu.EditMenu;
 import Menu.SettingsMenu;
+
+import com.google.gson.*;
+
 public class ArkIVv7 implements ActionListener{
     private JFrame frame;
     private JPanel taskPanel;
@@ -158,6 +161,10 @@ public class ArkIVv7 implements ActionListener{
         sidebarPanel.setLayout(new BoxLayout(sidebarPanel, BoxLayout.Y_AXIS));
         sidebarPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UniversalThemes.BORDER_COLOR2));
         createMenuBar();
+        createSearchBar();
+
+
+
 
         // ── Inner split: tasks (top) + input (bottom) ────────────────────
         JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, inputScroll);
@@ -323,6 +330,76 @@ public class ArkIVv7 implements ActionListener{
         settingsMenu.add(preferences);
     }
 
+    private void createSearchBar(){
+        JTextField searchBar = new JTextField();
+        searchBar.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchBar.setForeground(UniversalThemes.TXT_PRIMARY);
+        searchBar.setCaretColor(UniversalThemes.ACCENT_COLOR);
+        searchBar.setFont(UniversalThemes.UI_FONT_BIG);
+        searchBar.setBorder(BorderFactory.createMatteBorder(1,1,1,1, UniversalThemes.BORDER_COLOR2));
+        searchBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // cap height
+
+        JButton searchButton = new JButton() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int cx = getWidth() / 2 - 2, cy = getHeight() / 2 - 2;
+
+                g2.setColor(UniversalThemes.BG_COMPONENT);
+                g2.fillOval(cx - 6, cy - 6, 12, 12);
+
+                g2.setColor(UniversalThemes.TXT_PRIMARY);
+                g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawOval(cx - 6, cy - 6, 12, 12);
+
+                g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(cx + 4, cy + 4, cx + 9, cy + 9);
+
+                g2.dispose();
+            }
+        };
+//        searchButton.setFont(UniversalThemes.UI_FONT_EMOJI1);
+        searchButton.setPreferredSize(new Dimension(30, 30));
+        searchButton.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchButton.setForeground(UniversalThemes.TXT_SELECTED);
+        searchButton.setBorder(new LineBorder(UniversalThemes.BORDER_COLOR2, 1));
+        searchButton.setFocusable(false);
+
+        searchButton.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (!searchButton.isEnabled()) return;
+            searchButton.setBackground(UniversalThemes.BORDER_COLOR1);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (!searchButton.isEnabled()) return;
+            searchButton.setBackground(UniversalThemes.BG_SIDEBAR);
+        }
+        });
+
+        searchButton.setUI(new UniversalThemes.NoPressedButtonUI());
+
+//        UniversalThemes.ClickEffect(searchButton);
+
+        JPanel searchRow = new JPanel(new BorderLayout(5, 0)); // 4px gap
+        searchRow.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchRow.add(searchBar, BorderLayout.CENTER);
+        searchRow.add(searchButton, BorderLayout.EAST);
+
+        JPanel searchWrapper = new JPanel(new BorderLayout());
+        searchWrapper.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchWrapper.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8)); // padding
+        searchWrapper.add(searchRow, BorderLayout.CENTER);
+        searchWrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+
+        sidebarPanel.add(searchWrapper);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
@@ -373,58 +450,48 @@ public class ArkIVv7 implements ActionListener{
         File file = new File(FILE_NAME);
         if (file.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                StringBuilder encryptedBuilder = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    encryptedBuilder.append(line).append("\n");
+                    sb.append(line).append("\n");
                 }
 
-                String decryptedData = decrypt(encryptedBuilder.toString());
-                BufferedReader dataReader = new BufferedReader(new StringReader(decryptedData));
-                String dataLine;
-                allTasks.clear();  // Clear any existing (prevents duplicates if reloading)
-                idToTaskMap.clear();  // Clear map too
-                while ((dataLine = dataReader.readLine()) != null) {
-                    String[] parts = dataLine.split("\\|", 6);
-                    if (parts.length == 6) {
-                        int id = Integer.parseInt(parts[0]);
-                        int parentId = Integer.parseInt(parts[1]);
+                JsonArray array = JsonParser.parseString(sb.toString()).getAsJsonArray();
+                allTasks.clear();
+                idToTaskMap.clear();
 
-                        // Restore original pipes in text and line breaks
-                        String text = parts[2].replace("%%PIPE_ESCAPE%%", "|") // Replace escape sequence with pipe
-                                .replace("\\n", "\n"); // Restore line breaks
+                for (JsonElement el : array) {
+                    JsonObject obj = el.getAsJsonObject();
+                    int id            = obj.get("0001").getAsInt();                //0001 - id
+                    int parentId      = obj.get("0010").getAsInt();                //0010 - parent id
+                    String text       = obj.get("0011").getAsString();             //0011 - text
+                    boolean done      = obj.get("0100").getAsBoolean();            //0100 - done
+                    boolean isSubtask = obj.get("0101").getAsBoolean();            //0101 - is Subtask
+                    boolean isCollapsed = obj.get("0110").getAsBoolean();          //0110 - is Collapsed
 
-                        boolean done = parts[3].equals("1");
-                        boolean isSubtask = parts[4].equals("1");
-                        boolean isCollapsed = parts[5].equals("1");
-
-                        taskCounter = Math.max(taskCounter, id + 1);
-                        TaskItem task = new TaskItem(id, text, done, isSubtask, isCollapsed, parentId);
-                        allTasks.add(task);  // Add in Menu_file order (preserves saved/moved order)
-                        idToTaskMap.put(id, task);
-                    }
+                    taskCounter = Math.max(taskCounter, id + 1);
+                    TaskItem task = new TaskItem(id, text, done, isSubtask, isCollapsed, parentId);
+                    allTasks.add(task);
+                    idToTaskMap.put(id, task);
                 }
 
-                // Separate main tasks and subtasks, preserving order from allTasks
                 List<TaskItem> mainTasks = new ArrayList<>();
-                for (TaskItem task : allTasks) {  // Loop preserves order
+                for (TaskItem task : allTasks) {
                     if (!task.isSubtask()) {
                         mainTasks.add(task);
-                        taskPanel.add(task); // Add main tasks in saved order (skips subtasks)
+                        taskPanel.add(task);
                     }
-                    // Subtasks are intentionally NOT added here -- they'll be inserted via showSubtasks()
                 }
 
-                // Now show subtasks after main tasks are added (uses fixed showSubtasks, no ID sort)
-                for (TaskItem task : mainTasks) {  // mainTasks is in saved order
+                for (TaskItem task : mainTasks) {
                     if (!task.isCollapsed()) {
-                        showSubtasks(task);  // Now preserves subtask order too
+                        showSubtasks(task);
                     }
                 }
 
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, "Error loading tasks (decryption failed)");
-                e.printStackTrace(); // Print stack trace for debugging
+                JOptionPane.showMessageDialog(frame, "Error loading tasks");
+                e.printStackTrace();
             }
         }
     }
@@ -434,27 +501,22 @@ public class ArkIVv7 implements ActionListener{
 
     private void saveTasks() {
         try {
-            StringBuilder plainBuilder = new StringBuilder();
+            JsonArray array = new JsonArray();
             for (TaskItem t : allTasks) {
-                // Escape pipes in task text before saving
-                String escapedText = t.getRawText().replace("|", "%%PIPE_ESCAPE%%")
-                        .replace("\n", "\\n"); // Replace line breaks with a placeholder
-
-                plainBuilder.append(t.getId()).append("|")
-                        .append(t.getParentId()).append("|")
-                        .append(escapedText) // Use the escaped text
-                        .append("|")
-                        .append(t.isDone() ? "1" : "0").append("|")
-                        .append(t.isSubtask() ? "1" : "0").append("|")
-                        .append(t.isCollapsed() ? "1" : "0").append("\n");
+                JsonObject obj = new JsonObject();
+                obj.addProperty("0001", t.getId());
+                obj.addProperty("0010", t.getParentId());
+                obj.addProperty("0011", t.getRawText());
+                obj.addProperty("0100", t.isDone());
+                obj.addProperty("0101", t.isSubtask());
+                obj.addProperty("0110", t.isCollapsed());
+                array.add(obj);
             }
-
-            String encryptedText = encrypt(plainBuilder.toString());
             try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {
-                writer.print(encryptedText);
+                writer.print(new GsonBuilder().setPrettyPrinting().create().toJson(array));
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(frame, "Error saving tasks (encryption failed)");
+            JOptionPane.showMessageDialog(frame, "Error saving tasks");
         }
     }
 
@@ -627,29 +689,46 @@ public class ArkIVv7 implements ActionListener{
 //            UniversalThemes.ClickEffect(editButton);
 //            editButton.addActionListener(e -> editTask());
 
-            JButton deleteButton = new JButton(" \uD83D\uDDD1\uFE0F ");
-            deleteButton.setText("<html><div style='margin-top:3px;'>🗑️</div></html>");
-            deleteButton.setFont(UniversalThemes.UI_FONT_EMOJI);
-            deleteButton.setBackground(UniversalThemes.ACCENT_COLOR);
-            deleteButton.setForeground(UniversalThemes.TXT_SELECTED);
-            deleteButton.setBorder(new LineBorder(UniversalThemes.ACCENT_COLOR_DARK, 2));
-            deleteButton.setPreferredSize(new Dimension(40, 29));
+//            JButton deleteButton = new JButton(" \uD83D\uDDD1\uFE0F ");
+//            deleteButton.setText("<html><div style='margin-top:3px;'>🗑️</div></html>");
+//            deleteButton.setFont(UniversalThemes.UI_FONT_EMOJI);
+//            deleteButton.setBackground(UniversalThemes.ACCENT_COLOR);
+//            deleteButton.setForeground(UniversalThemes.TXT_SELECTED);
+//            deleteButton.setBorder(new LineBorder(UniversalThemes.ACCENT_COLOR_DARK, 2));
+//            deleteButton.setPreferredSize(new Dimension(40, 29));
+//
+//            UniversalThemes.ClickEffect(deleteButton);
 
-            UniversalThemes.ClickEffect(deleteButton);
-
-            deleteButton.addActionListener(e -> confirmDeleteTask());
-
+//            deleteButton.addActionListener(e -> confirmDeleteTask());
+//
 //            buttonPanel.add(editButton);
-            buttonPanel.add(deleteButton);
+//            buttonPanel.add(deleteButton);
 
             if (!isSubtask) {
-                JButton createSubtaskButton = new JButton(" ➕ ");
-                createSubtaskButton.setText("<html><div style='margin-top:1px;'>➕</div></html>");
-                createSubtaskButton.setFont(UniversalThemes.UI_FONT_EMOJI1);
+                JButton createSubtaskButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        super.paintComponent(g);
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                        int cx = getWidth() / 2, cy = getHeight() / 2;
+                        int arm = 7;
+
+                        g2.setColor(UniversalThemes.TXT_SELECTED);
+                        g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                        g2.drawLine(cx - arm, cy, cx + arm, cy);
+                        g2.drawLine(cx, cy - arm, cx, cy + arm);
+
+                        g2.dispose();
+                    }
+                };
+//                createSubtaskButton.setFont(UniversalThemes.UI_FONT_EMOJI1);
                 createSubtaskButton.setBackground(UniversalThemes.ACCENT_COLOR);
                 createSubtaskButton.setForeground(UniversalThemes.TXT_SELECTED);
                 createSubtaskButton.setBorder(new LineBorder(UniversalThemes.ACCENT_COLOR_DARK, 2));
                 createSubtaskButton.setPreferredSize(new Dimension(40, 29));
+                createSubtaskButton.setUI(new UniversalThemes.NoPressedButtonUI());
                 UniversalThemes.ClickEffect(createSubtaskButton);
 
                 createSubtaskButton.addActionListener(e -> createSubtask());
@@ -697,6 +776,26 @@ public class ArkIVv7 implements ActionListener{
                 public void actionPerformed(ActionEvent e) {
                     if(isSelected){
                         editTask();
+                    }
+                }
+            });
+
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "Delete");
+            am.put("Delete", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (isSelected) {
+                        confirmDeleteTask();
+                    }
+                }
+            });
+
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Deselect");
+            am.put("Deselect", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (isSelected) {
+                        deselectAll();
                     }
                 }
             });
@@ -1001,8 +1100,8 @@ public class ArkIVv7 implements ActionListener{
             }
 
             String message = hasSubtasks
-                    ? " Delete this task and its subtasks?"
-                    : " Delete this task? ";
+                    ? " Delete this Entry and its sub-Entries ?"
+                    : " Delete this Entry ? ";
 
             boolean confirmed = UniversalThemes.showConfirmPopup(
                     frame,
