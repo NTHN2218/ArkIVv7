@@ -29,6 +29,7 @@ public class UniversalThemes {
 
     public static final Color ACCENT_COLOR    = new Color(0x2fafbc);  //0xE67E22
     public static final Color ACCENT_COLOR_DARK = new Color(0x2b929d);  //0xC66A1A
+    public static final Color SEARCH_HIGHLIGHT_COLOR = new Color(0x2b929d); // distinct from ACCENT_COLOR
 
 //  public static final Color ACCENT_COLOR    = new Color(0xE67E22);
 //  public static final Color ACCENT_COLOR_DARK = new Color(0xC66A1A);

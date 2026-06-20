@@ -1,6 +1,16 @@
 package Menu;
 
+import java.util.function.*;
+
 public class EditMenu {
+
+    private final Runnable collapseAll;
+    private final Runnable expandAll;
+
+    public EditMenu(Runnable collapseAll, Runnable expandAll) {
+        this.collapseAll = collapseAll;
+        this.expandAll = expandAll;
+    }
 
     public void undo(){
         System.out.println("Undo Works");
@@ -10,13 +20,8 @@ public class EditMenu {
         System.out.println("Redo Works");
     }
 
-    public void collapseAll(){
-        System.out.println("Collapse All Works");
+    public void collapseAll() { collapseAll.run(); }
 
-    }
-
-    public void expandAll(){
-        System.out.println("Expand All Works");
-    }
+    public void expandAll()   { expandAll.run();   }
 
 }

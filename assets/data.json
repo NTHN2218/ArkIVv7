@@ -1,138 +1,426 @@
 [
   {
-    "0001": 1,
-    "0010": -1,
-    "0011": "Movies",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 1,
+    "parentID": -1,
+    "TXT": "Movies",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": false
   },
   {
-    "0001": 2,
-    "0010": -1,
-    "0011": "Animated Movies",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 2,
+    "parentID": -1,
+    "TXT": "Animated Movies",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": false
   },
   {
-    "0001": 3,
-    "0010": -1,
-    "0011": "Anime Movies",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 3,
+    "parentID": -1,
+    "TXT": "Anime Movies",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 4,
-    "0010": -1,
-    "0011": "Animes",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 4,
+    "parentID": -1,
+    "TXT": "Animes",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": false
   },
   {
-    "0001": 5,
-    "0010": -1,
-    "0011": "Series",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 5,
+    "parentID": -1,
+    "TXT": "Series",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 6,
-    "0010": -1,
-    "0011": "Cartoon Series",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 6,
+    "parentID": -1,
+    "TXT": "Cartoon Series",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 7,
-    "0010": -1,
-    "0011": "Video Games",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 7,
+    "parentID": -1,
+    "TXT": "Video Games",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 8,
-    "0010": -1,
-    "0011": "Mobile Games",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 8,
+    "parentID": -1,
+    "TXT": "Mobile Games",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 9,
-    "0010": -1,
-    "0011": "Important Websites",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 9,
+    "parentID": -1,
+    "TXT": "Important Websites",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 13,
-    "0010": -1,
-    "0011": "Pirated Websites",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 13,
+    "parentID": -1,
+    "TXT": "Pirated Websites",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 10,
-    "0010": -1,
-    "0011": "CMD Prompts",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 10,
+    "parentID": -1,
+    "TXT": "CMD Prompts",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 11,
-    "0010": -1,
-    "0011": "Future Goals",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 11,
+    "parentID": -1,
+    "TXT": "Future Goals",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 12,
-    "0010": -1,
-    "0011": "Important Windows Paths",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 12,
+    "parentID": -1,
+    "TXT": "Important Windows Paths",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 14,
-    "0010": 1,
-    "0011": "1.0-   Hacksaw Ridge    [✔]",
-    "0100": false,
-    "0101": true,
-    "0110": false
+    "ID": 14,
+    "parentID": 1,
+    "TXT": "1.0-   Hacksaw Ridge    [✔]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
   },
   {
-    "0001": 15,
-    "0010": 1,
-    "0011": "2.0-   Interstellar    [✔]",
-    "0100": false,
-    "0101": true,
-    "0110": false
+    "ID": 15,
+    "parentID": 1,
+    "TXT": "2.0-   Interstellar    [✔]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
   },
   {
-    "0001": 16,
-    "0010": -1,
-    "0011": "MenuBar",
-    "0100": false,
-    "0101": false,
-    "0110": false
+    "ID": 16,
+    "parentID": -1,
+    "TXT": "MenuBar",
+    "isDone": false,
+    "isSub": false,
+    "isCollapsed": true
   },
   {
-    "0001": 17,
-    "0010": 16,
-    "0011": "1.0-   File",
-    "0100": false,
-    "0101": true,
-    "0110": false
+    "ID": 17,
+    "parentID": 16,
+    "TXT": "File\n\n1.1-   New Entry      [✔]\n\n1.2-   Import Data\n\n1.3-   Export Data\n\n1.4-   \n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 21,
+    "parentID": 16,
+    "TXT": "Edit\n\n1 - Undo\n\n2 - Redo\n\n3 - Collapse All    [✔]\n\n4 - Expand All      [✔]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 22,
+    "parentID": 16,
+    "TXT": "3.0-   Settings",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 23,
+    "parentID": 16,
+    "TXT": "4.0-   Help",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 24,
+    "parentID": 1,
+    "TXT": "3.0-   Oppenheimer    [✔]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 25,
+    "parentID": 4,
+    "TXT": "1.1-   Violet Evergarden  (Anime)           [✔]\n\n1.2-   Violoet Evergarden - The Movie   [✔]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 26,
+    "parentID": 4,
+    "TXT": "2.0-   Terror in Resonance   [✔]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 27,
+    "parentID": 4,
+    "TXT": "3.1-   Full time magister s1\n\n3.2-   Full time magister s2\n\n3.3-   Full time magister s3\n\n3.4-   Full time magister s4\n\n3.5-   Full time magister s5\n\n3.6-   Full time magister s6\n\n3.7-   Full time magister s7\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 28,
+    "parentID": 4,
+    "TXT": "4.1-   Swallowed Star 1 (Audio Novel)    [✔]\n\n4.2-   Swallowed Star 2 - Origin Continent (Audio Novel)\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 29,
+    "parentID": 4,
+    "TXT": "5.1-   Soul Land 1     [✔]\n\n5.2-   Soul Land 2 : The Peerless Tang clan\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 30,
+    "parentID": 4,
+    "TXT": "6.0-   Throne of Seal  (Anime and Audio Novel)",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 31,
+    "parentID": 4,
+    "TXT": "7.0-   Battle Through the Heavens",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 32,
+    "parentID": 4,
+    "TXT": "8.1-   Solo Leveling s1    [✔]\n\n8.2-   Solo Leveling s2    [✔]\n\n8.3-   Solo Leveling s3    [yet to release]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 33,
+    "parentID": 4,
+    "TXT": "9.1-   Rakshasa Street s1    [✔] [✔]   \n\n9.2-   Rakshasa Street s2    [✔] [✔]\n\n9.3-   Rakshasa Street s3    [✔]\n\n9.4-   Rakshasa Street s4    [✔]\n\n9.5-   Rakshasa Street s5    [yet to release]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 34,
+    "parentID": 4,
+    "TXT": "0.1-   Vinland Saga s1    [✔]\n\n0.2-   Vinland Saga s2    [✔]\n____",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 35,
+    "parentID": 4,
+    "TXT": "1.1-   Classroom of the Elite s1    [✔]\n\n1.2-   Classroom of the Elite s2    [✔]\n\n1.3-   Classroom of the Elite s3    [✔]\n\n1.4-   Classroom of the Elite s4 \n____",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 36,
+    "parentID": 4,
+    "TXT": "2.1-   Rascal does not dream of bunny girl senpai (Anime)           [✔]\n\n2.2-   Rascal does not dream of a dreaming girl (Movie)               [✔]\n\n2.3-   Rascal does not dream of a sister venturing out (Movie)     [✔]\n\n2.4-   Rascal does not dream of a knapsack kid (Movie)                 [✔]               \n\n2.5-   Rascal does not dream of santa claus (Anime)                       [✔]\n\n2.6-   Rascal does not dream of a dear friend(Movie)            (Oct 16, 2026)\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 37,
+    "parentID": 4,
+    "TXT": "3.0-   The Fragrant Flower Blooms with Dignity   [✔]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 38,
+    "parentID": 4,
+    "TXT": "4.1-   My Happy Marriage s1   [✔]\n\n4.2-   My Happy Marriage s2   [✔]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 39,
+    "parentID": 4,
+    "TXT": "5.1-   Horimiya s1\n\n5.2-   Horimiya s2\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 46,
+    "parentID": 1,
+    "TXT": "4.1-   John Wick 1\n\n4.2-   John Wick 2\n\n4.3-   John Wick 3\n\n4.4-   John Wick 4\n\n5.5-   John Wick - Ballerina\n_",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 47,
+    "parentID": 1,
+    "TXT": "5.1-   The Accountant 1    [✔]\n\n5.2-   The Accountant 2    [✔]\n_",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 48,
+    "parentID": 1,
+    "TXT": "6.0-   The Foreigner - Jackie Chan    [Watched]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 49,
+    "parentID": 1,
+    "TXT": "7.0-   The Imitation Game    [✔]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 50,
+    "parentID": 1,
+    "TXT": "8.0-   The Law Abiding Citizen    [Watched]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 51,
+    "parentID": 1,
+    "TXT": "9.0-   Hachi : A Dog\u0027s Tale    [Watched]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 52,
+    "parentID": 1,
+    "TXT": "0.1-   Dune: Part 1     [✔]\n\n0.2-   Dune: Part 2\n\n0.3-   Dune: Part 3\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 53,
+    "parentID": 1,
+    "TXT": "1.0-   Chak De! India    [Watched]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 54,
+    "parentID": 1,
+    "TXT": "2.1-   The Amazing Spiderman 1    [Completed]   \n\n2.2-   The Amazing Spiderman 2    [Completed]   \n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 55,
+    "parentID": 1,
+    "TXT": "3.1-   Spider-Man: Homecoming       [Watched]\n\n3.2-   Spider-Man: Far From Home    [Watched]\n\n3.3-   Spider-Man: No Way Home     [Watched]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 56,
+    "parentID": 1,
+    "TXT": "4.0-   Dunkirk    [Watched]",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 57,
+    "parentID": 1,
+    "TXT": "Hindi Movie Watchlist\n\n- Chichorre\n\n- Chennai Express\n\n-  Kal ho na ho\n\n-Zindagi na milegi dubara\n\n-yeh Jawani hai Diwani\n\n-Happy New Year\n\n-Dilwaale\n\n-Student of the Year\n\n-   DDLJ\n\n-PK\n\n-Taare Zammen par\n\n-Fighter (Hrithik Roshan)\n\n-Padman\n\n-Chalte Chalte\n\n-Jab we Met\n\n-Kuch Kuch hota hai\n\n-Koi mil Gaya\n\n-M.S Dhoni : The Untold Story\n\n- LUCKY BHASKAR\n\n- Main HU Lucky The Racer\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 58,
+    "parentID": 2,
+    "TXT": "1.1-   How to train your Dragon 1    [✔]\n\n1.2-   How to train your Dragon 2    [✔]\n\n1.3-   How to train your Dragon 3    [✔]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 59,
+    "parentID": 2,
+    "TXT": "2.1-   Kung fu Panda 1    [✔]\n\n2.2-   Kung fu Panda 2    [✔]\n\n2.3-   Kung fu Panda 3    [✔]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 60,
+    "parentID": 2,
+    "TXT": "3.1-   Frozen 1    [✔]\n\n3.2-   Frozen 2    [✔]\n\n3.3-   Frozen 3    [to be released on 24 Nov, 2027]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 61,
+    "parentID": 2,
+    "TXT": "4.1-   Spiderman into the Spider-Verse    [✔]\n\n4.2-   Spiderman across the Spider-Verse    [✔]\n\n4.3-   Spiderman beyond the Spider-Verse    [not released]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
+  },
+  {
+    "ID": 62,
+    "parentID": 2,
+    "TXT": "5.1-   The Incredibles 1   [✔]\n\n5.2-   The Incredibles 2   [✔]\n___",
+    "isDone": false,
+    "isSub": true,
+    "isCollapsed": false
   }
 ]

@@ -45,6 +45,9 @@ public class ArkIVv7 implements ActionListener{
     private List<TaskItem> allTasks = new ArrayList<>();
 
     private TaskItem selectedTask = null;
+    private List<TaskItem> searchResults = new ArrayList<>();
+    private int searchIndex = -1;
+    private TaskItem highlightedSearchTask = null;
 
     private JDialog dialog;
 
@@ -58,9 +61,19 @@ public class ArkIVv7 implements ActionListener{
             })
     );
 
+    EditMenu Menu_edit = new EditMenu(
+            this::collapseAll,
+            this::expandAll
+    );
 
-    EditMenu Menu_edit = new EditMenu();
+
     SettingsMenu Menu_settings = new SettingsMenu();
+
+    //Search and find functionality
+    private JScrollPane taskScrollPane;
+    private JTextField searchBar;
+    private JButton searchPrevButton, searchNextButton;
+    private String lastSearchedQuery = "";
 
     public ArkIVv7() {
 
@@ -77,12 +90,12 @@ public class ArkIVv7 implements ActionListener{
         taskPanel.setBackground(UniversalThemes.BG_MAIN);
         taskPanel.setLayout(new BoxLayout(taskPanel, BoxLayout.Y_AXIS));
 
-        JScrollPane scrollPane = new JScrollPane(taskPanel);
-        scrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR1, 1));
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(35);
-        scrollPane.getViewport().setBackground(UniversalThemes.BG_MAIN);
-        UniversalThemes.applyScrollbarTheme(scrollPane);
+        taskScrollPane = new JScrollPane(taskPanel);
+        taskScrollPane.setBorder(BorderFactory.createLineBorder(UniversalThemes.BORDER_COLOR1, 1));
+        taskScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        taskScrollPane.getVerticalScrollBar().setUnitIncrement(35);
+        taskScrollPane.getViewport().setBackground(UniversalThemes.BG_MAIN);
+        UniversalThemes.applyScrollbarTheme(taskScrollPane);
 
         // ── Input area + scroll ──────────────────────────────────────────
         inputArea = new JTextArea(3, 30);
@@ -167,7 +180,7 @@ public class ArkIVv7 implements ActionListener{
 
 
         // ── Inner split: tasks (top) + input (bottom) ────────────────────
-        JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, inputScroll);
+        JSplitPane innerSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, taskScrollPane, inputScroll);
         innerSplitPane.setResizeWeight(0.96);   // tasks absorb all extra space
         innerSplitPane.setDividerSize(0);
         innerSplitPane.setBorder(null);
@@ -211,6 +224,7 @@ public class ArkIVv7 implements ActionListener{
         // Reset global selected task
         selectedTask = null;
 
+
         // Loop through all tasks and deselect each (stops flickers, resets borders, clears isSelected)
         for (TaskItem task : allTasks) {
             task.deselectThisTask();  // Calls stopFlicker(), sets isSelected=false, resets border
@@ -222,6 +236,83 @@ public class ArkIVv7 implements ActionListener{
         // Optional: Repaint panel to ensure visuals update immediately
         taskPanel.revalidate();
         taskPanel.repaint();
+    }
+
+    private void performSearch(String query) {
+        // Clear any highlight from a previous search before starting a new one
+        if (highlightedSearchTask != null) {
+            highlightedSearchTask.clearSearchHighlight();
+            highlightedSearchTask = null;
+        }
+
+        searchResults.clear();
+        searchIndex = -1;
+
+        String q = query.trim().toLowerCase();
+        lastSearchedQuery = q;
+        if (q.isEmpty()) {
+            return;
+        }
+
+        List<TaskItem> matched = new ArrayList<>();
+        Map<TaskItem, Integer> matchPosition = new HashMap<>();
+
+        for (TaskItem task : allTasks) {
+            String text = task.getRawText().toLowerCase();
+            int pos = text.indexOf(q);
+            if (pos != -1) {
+                matched.add(task);
+                matchPosition.put(task, pos);
+            }
+        }
+
+        // Earlier match position in the text = closer/more relevant
+        matched.sort(Comparator.comparingInt(matchPosition::get));
+        searchResults.addAll(matched);
+    }
+
+    private void jumpToResult(int index) {
+        if (searchResults.isEmpty()) return;
+
+        // Wrap around in both directions
+        if (index < 0) index = searchResults.size() - 1;
+        if (index >= searchResults.size()) index = 0;
+        searchIndex = index;
+
+        TaskItem target = searchResults.get(searchIndex);
+
+        // Clear previous highlight if it's a different task
+        if (highlightedSearchTask != null && highlightedSearchTask != target) {
+            highlightedSearchTask.clearSearchHighlight();
+        }
+
+        // If the match is a subtask hidden under a collapsed parent, expand it
+        if (target.isSubtask()) {
+            TaskItem parent = idToTaskMap.get(target.getParentId());
+            if (parent != null && parent.isCollapsed()) {
+                expandTask(parent);
+            }
+        }
+
+        // Avoid flicker-vs-highlight border conflict (see step 2 notes)
+        if (selectedTask != null) {
+            selectedTask.deselectThisTask();
+        }
+
+        target.applySearchHighlight();
+        highlightedSearchTask = target;
+
+        SwingUtilities.invokeLater(() -> {
+            taskPanel.scrollRectToVisible(target.getBounds());
+        });
+    }
+
+    private void updateSearchButtonStates() {
+        boolean hasResults = !searchResults.isEmpty();
+        searchPrevButton.setEnabled(hasResults);
+        searchNextButton.setEnabled(hasResults);
+        searchPrevButton.repaint();
+        searchNextButton.repaint();
     }
 
     private void createMenuBar() {
@@ -331,13 +422,14 @@ public class ArkIVv7 implements ActionListener{
     }
 
     private void createSearchBar(){
-        JTextField searchBar = new JTextField();
+        searchBar = new JTextField();
         searchBar.setBackground(UniversalThemes.BG_SIDEBAR);
         searchBar.setForeground(UniversalThemes.TXT_PRIMARY);
         searchBar.setCaretColor(UniversalThemes.ACCENT_COLOR);
         searchBar.setFont(UniversalThemes.UI_FONT_BIG);
         searchBar.setBorder(BorderFactory.createMatteBorder(1,1,1,1, UniversalThemes.BORDER_COLOR2));
-        searchBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // cap height
+        searchBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // cap searchBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // cap height
+        searchBar.setPreferredSize(new Dimension(0, 30)); // match button height; width controlled by BorderLayout.CENTER
 
         JButton searchButton = new JButton() {
             @Override
@@ -384,18 +476,141 @@ public class ArkIVv7 implements ActionListener{
 
         searchButton.setUI(new UniversalThemes.NoPressedButtonUI());
 
+        searchPrevButton = new JButton() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int cx = getWidth() / 2, cy = getHeight() / 2;
+                int arm = 5;
+
+                g2.setColor(isEnabled() ? UniversalThemes.TXT_PRIMARY : UniversalThemes.DISABLED_TEXT);
+                g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(cx - arm, cy + 3, cx, cy - 3);
+                g2.drawLine(cx, cy - 3, cx + arm, cy + 3);
+
+                g2.dispose();
+            }
+        };
+        searchPrevButton.setPreferredSize(new Dimension(26, 30));
+        searchPrevButton.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchPrevButton.setBorder(new LineBorder(UniversalThemes.BORDER_COLOR2, 1));
+        searchPrevButton.setFocusable(false);
+        searchPrevButton.setUI(new UniversalThemes.NoPressedButtonUI());
+        searchPrevButton.setEnabled(false);
+        searchPrevButton.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                if (searchPrevButton.isEnabled()) searchPrevButton.setBackground(UniversalThemes.BORDER_COLOR1);
+            }
+            public void mouseReleased(MouseEvent e) {
+                if (searchPrevButton.isEnabled()) searchPrevButton.setBackground(UniversalThemes.BG_SIDEBAR);
+            }
+        });
+
+        searchNextButton = new JButton() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int cx = getWidth() / 2, cy = getHeight() / 2;
+                int arm = 5;
+
+                g2.setColor(isEnabled() ? UniversalThemes.TXT_PRIMARY : UniversalThemes.DISABLED_TEXT);
+                g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(cx - arm, cy - 3, cx, cy + 3);
+                g2.drawLine(cx, cy + 3, cx + arm, cy - 3);
+
+                g2.dispose();
+            }
+        };
+        searchNextButton.setPreferredSize(new Dimension(26, 30));
+        searchNextButton.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchNextButton.setBorder(new LineBorder(UniversalThemes.BORDER_COLOR2, 1));
+        searchNextButton.setFocusable(false);
+        searchNextButton.setUI(new UniversalThemes.NoPressedButtonUI());
+        searchNextButton.setEnabled(false);
+        searchNextButton.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                if (searchNextButton.isEnabled()) searchNextButton.setBackground(UniversalThemes.BORDER_COLOR1);
+            }
+            public void mouseReleased(MouseEvent e) {
+                if (searchNextButton.isEnabled()) searchNextButton.setBackground(UniversalThemes.BG_SIDEBAR);
+            }
+        });
+
 //        UniversalThemes.ClickEffect(searchButton);
 
         JPanel searchRow = new JPanel(new BorderLayout(5, 0)); // 4px gap
         searchRow.setBackground(UniversalThemes.BG_SIDEBAR);
         searchRow.add(searchBar, BorderLayout.CENTER);
-        searchRow.add(searchButton, BorderLayout.EAST);
+
+        JPanel searchButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        searchButtonsPanel.setBackground(UniversalThemes.BG_SIDEBAR);
+        searchButtonsPanel.add(searchPrevButton);
+        searchButtonsPanel.add(searchNextButton);
+        searchButtonsPanel.add(searchButton);
+        searchRow.add(searchButtonsPanel, BorderLayout.EAST);
 
         JPanel searchWrapper = new JPanel(new BorderLayout());
         searchWrapper.setBackground(UniversalThemes.BG_SIDEBAR);
         searchWrapper.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8)); // padding
         searchWrapper.add(searchRow, BorderLayout.CENTER);
-        searchWrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        searchWrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        searchButton.addActionListener(e -> {
+            performSearch(searchBar.getText());
+            if (!searchResults.isEmpty()) {
+                jumpToResult(0);
+            }
+            updateSearchButtonStates();
+        });
+
+        searchBar.addActionListener(e -> {
+            // If we already have results for this exact search, Enter advances to next match
+            String query = searchBar.getText().trim();
+            if (!searchResults.isEmpty() && searchIndex != -1) {
+                jumpToResult(searchIndex + 1);
+            } else {
+                performSearch(query);
+                if (!searchResults.isEmpty()) {
+                    jumpToResult(0);
+                }
+            }
+            updateSearchButtonStates();
+        });
+
+        searchBar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e)  { checkForStaleSearch(); }
+            public void removeUpdate(DocumentEvent e)  { checkForStaleSearch(); }
+            public void changedUpdate(DocumentEvent e) { checkForStaleSearch(); }
+
+            private void checkForStaleSearch() {
+                String current = searchBar.getText().trim().toLowerCase();
+                if (!current.equals(lastSearchedQuery)) {
+                    if (highlightedSearchTask != null) {
+                        highlightedSearchTask.clearSearchHighlight();
+                        highlightedSearchTask = null;
+                    }
+                    searchResults.clear();
+                    searchIndex = -1;
+                    updateSearchButtonStates();
+                }
+            }
+        });
+
+        searchPrevButton.addActionListener(e -> {
+            jumpToResult(searchIndex - 1);
+            updateSearchButtonStates();
+        });
+
+        searchNextButton.addActionListener(e -> {
+            jumpToResult(searchIndex + 1);
+            updateSearchButtonStates();
+        });
 
         sidebarPanel.add(searchWrapper);
     }
@@ -426,6 +641,49 @@ public class ArkIVv7 implements ActionListener{
 
         }
 
+    }
+
+    private void collapseAll() {
+        for (TaskItem task : allTasks) {
+            if (!task.isSubtask() && !task.isCollapsed()) {
+                task.isCollapsed = true;
+                Border newOuter = BorderFactory.createMatteBorder(1, 0, 10, 0, UniversalThemes.BORDER_COLOR1);
+                Border currentInner = (task.getBorder() instanceof CompoundBorder)
+                        ? ((CompoundBorder) task.getBorder()).getInsideBorder()
+                        : BorderFactory.createLineBorder(UniversalThemes.BG_PANEL, 2);
+                task.setBorder(BorderFactory.createCompoundBorder(newOuter, currentInner));
+                hideSubtasks(task);
+            }
+        }
+        saveTasks();
+    }
+
+    private void expandAll() {
+        for (TaskItem task : allTasks) {
+            if (!task.isSubtask() && task.isCollapsed()) {
+                task.isCollapsed = false;
+                Border newOuter = BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR1);
+                Border currentInner = (task.getBorder() instanceof CompoundBorder)
+                        ? ((CompoundBorder) task.getBorder()).getInsideBorder()
+                        : BorderFactory.createLineBorder(UniversalThemes.BG_PANEL, 2);
+                task.setBorder(BorderFactory.createCompoundBorder(newOuter, currentInner));
+                showSubtasks(task);
+            }
+        }
+        saveTasks();
+    }
+
+    private void expandTask(TaskItem task) {
+        if (task.isCollapsed()) {
+            task.isCollapsed = false;
+            Border newOuter = BorderFactory.createMatteBorder(1, 0, 0, 0, UniversalThemes.BORDER_COLOR1);
+            Border currentInner = (task.getBorder() instanceof CompoundBorder)
+                    ? ((CompoundBorder) task.getBorder()).getInsideBorder()
+                    : BorderFactory.createLineBorder(UniversalThemes.BG_PANEL, 2);
+            task.setBorder(BorderFactory.createCompoundBorder(newOuter, currentInner));
+            showSubtasks(task);
+            saveTasks();
+        }
     }
 
     private void addTaskFromInput(String text) {
@@ -462,12 +720,12 @@ public class ArkIVv7 implements ActionListener{
 
                 for (JsonElement el : array) {
                     JsonObject obj = el.getAsJsonObject();
-                    int id            = obj.get("0001").getAsInt();                //0001 - id
-                    int parentId      = obj.get("0010").getAsInt();                //0010 - parent id
-                    String text       = obj.get("0011").getAsString();             //0011 - text
-                    boolean done      = obj.get("0100").getAsBoolean();            //0100 - done
-                    boolean isSubtask = obj.get("0101").getAsBoolean();            //0101 - is Subtask
-                    boolean isCollapsed = obj.get("0110").getAsBoolean();          //0110 - is Collapsed
+                    int id            = obj.get("ID").getAsInt();                //ID - id
+                    int parentId      = obj.get("parentID").getAsInt();             //parentID - parent id
+                    String text       = obj.get("TXT").getAsString();             //TXT - text
+                    boolean done      = obj.get("isDone").getAsBoolean();            //isDone - done
+                    boolean isSubtask = obj.get("isSub").getAsBoolean();            //isSub - is Subtask
+                    boolean isCollapsed = obj.get("isCollapsed").getAsBoolean();          //isCollapsed - is Collapsed
 
                     taskCounter = Math.max(taskCounter, id + 1);
                     TaskItem task = new TaskItem(id, text, done, isSubtask, isCollapsed, parentId);
@@ -504,12 +762,12 @@ public class ArkIVv7 implements ActionListener{
             JsonArray array = new JsonArray();
             for (TaskItem t : allTasks) {
                 JsonObject obj = new JsonObject();
-                obj.addProperty("0001", t.getId());
-                obj.addProperty("0010", t.getParentId());
-                obj.addProperty("0011", t.getRawText());
-                obj.addProperty("0100", t.isDone());
-                obj.addProperty("0101", t.isSubtask());
-                obj.addProperty("0110", t.isCollapsed());
+                obj.addProperty("ID", t.getId());
+                obj.addProperty("parentID", t.getParentId());
+                obj.addProperty("TXT", t.getRawText());
+                obj.addProperty("isDone", t.isDone());
+                obj.addProperty("isSub", t.isSubtask());
+                obj.addProperty("isCollapsed", t.isCollapsed());
                 array.add(obj);
             }
             try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {
@@ -594,6 +852,7 @@ public class ArkIVv7 implements ActionListener{
         private JTextArea textArea;
         private Timer flickerTimer;
         private boolean isSelected = false;
+        private boolean isSearchHighlighted = false;
 
         public TaskItem(int id, String text, boolean done, boolean isSubtask, boolean isCollapsed, int parentId) {
             this.id = id;
@@ -766,10 +1025,13 @@ public class ArkIVv7 implements ActionListener{
             add(leftPanel, BorderLayout.CENTER);
             add(buttonPanel, BorderLayout.EAST);
 
-            // New: Add key bindings for Ctrl+UpArrow (move up) and Ctrl+DownArrow (move down)
+
+            //Shortcuts for convenience
+
             InputMap im = this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             ActionMap am = this.getActionMap();
 
+            //Edit Task
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK), "Edit");
             am.put("Edit", new AbstractAction() {
                 @Override
@@ -780,6 +1042,7 @@ public class ArkIVv7 implements ActionListener{
                 }
             });
 
+            //Delete Task
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "Delete");
             am.put("Delete", new AbstractAction() {
                 @Override
@@ -790,6 +1053,18 @@ public class ArkIVv7 implements ActionListener{
                 }
             });
 
+            //add subtask to task
+            im.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "addSubTask");
+            am.put("addSubTask", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (isSelected) {
+                        createSubtask();
+                    }
+                }
+            });
+
+            //Deselect selected tasks
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "Deselect");
             am.put("Deselect", new AbstractAction() {
                 @Override
@@ -800,6 +1075,7 @@ public class ArkIVv7 implements ActionListener{
                 }
             });
 
+            //Move Up selected task
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK), "moveUp");
             am.put("moveUp", new AbstractAction() {
                 @Override
@@ -810,6 +1086,7 @@ public class ArkIVv7 implements ActionListener{
                 }
             });
 
+            //Move Down selected task
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK), "moveDown");
             am.put("moveDown", new AbstractAction() {
                 @Override
@@ -819,6 +1096,7 @@ public class ArkIVv7 implements ActionListener{
                     }
                 }
             });
+
         }
 
         public int getId() { return id; }
@@ -899,6 +1177,21 @@ public class ArkIVv7 implements ActionListener{
                 innerBorder = BorderFactory.createLineBorder(UniversalThemes.BG_COMPONENT, 2);
             }
             setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+        }
+
+        public void applySearchHighlight() {
+            isSearchHighlighted = true;
+            Border currentBorder = getBorder();
+            Border outerBorder = (currentBorder instanceof CompoundBorder)
+                    ? ((CompoundBorder) currentBorder).getOutsideBorder()
+                    : BorderFactory.createEmptyBorder();
+            Border highlightInner = BorderFactory.createLineBorder(UniversalThemes.SEARCH_HIGHLIGHT_COLOR, 2);
+            setBorder(BorderFactory.createCompoundBorder(outerBorder, highlightInner));
+        }
+
+        public void clearSearchHighlight() {
+            isSearchHighlighted = false;
+            resetInnerBorder();
         }
 
 
